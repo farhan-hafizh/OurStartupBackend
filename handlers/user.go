@@ -52,8 +52,50 @@ func (handler *userHandler) RegisterUser(c *gin.Context) {
 	}
 
 	response :=
-		helper.CreateResponse("Your account successfully registered!", 200, "Success", user.FormatRegisterResponse(newUser))
+		helper.CreateResponse(
+			"Your account successfully registered!",
+			200,
+			"Success",
+			user.FormatRegisterResponse(newUser))
 
 	c.JSON(http.StatusOK, response)
+}
 
+func (handler *userHandler) Login(c *gin.Context) {
+	// init temp
+	input := &user.LoginUserInput{}
+
+	err := c.ShouldBindJSON(&input)
+
+	if err != nil {
+		errorValidation := gin.H{"errors": helper.FormatValidationError(err)}
+
+		c.JSON(
+			http.StatusBadRequest,
+			helper.CreateResponse("Login failed",
+				http.StatusUnprocessableEntity,
+				"Failed",
+				errorValidation))
+		c.Error(err)
+		c.Abort()
+		return
+	}
+
+	foundedUser, err := handler.userService.Login(*input)
+
+	if err != nil {
+		c.JSON(
+			http.StatusBadRequest,
+			helper.CreateResponse("Login failed",
+				http.StatusNotFound,
+				"Failed",
+				gin.H{"errors": err.Error()}))
+		c.Error(err)
+		c.Abort()
+		return
+	}
+	response :=
+		helper.CreateResponse("Your account successfully registered!", 200, "Success", user.FormatRegisterResponse(foundedUser))
+
+	c.JSON(http.StatusOK, response)
 }
