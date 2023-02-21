@@ -24,41 +24,36 @@ func (handler *userHandler) RegisterUser(c *gin.Context) {
 	err := c.ShouldBindJSON(&input)
 
 	if err != nil {
-		errorValidation := gin.H{"errors": helper.FormatValidationError(err)}
-
-		c.JSON(
-			http.StatusBadRequest,
-			helper.CreateResponse("Register account failed",
-				http.StatusUnprocessableEntity,
-				"Failed",
-				errorValidation))
-		c.Error(err)
-		c.Abort()
+		helper.SendErrorResponse(
+			c,
+			"Register account failed",
+			http.StatusUnprocessableEntity,
+			"Failed",
+			true,
+			err)
 		return
 	}
 
 	newUser, err := handler.userService.RegisterUser(*input)
 
 	if err != nil {
-		c.JSON(
+		helper.SendErrorResponse(
+			c,
+			"Register account failed",
 			http.StatusBadRequest,
-			helper.CreateResponse("Register account failed",
-				http.StatusBadRequest, "Failed",
-				err.Error()))
-
-		c.Error(err)
-		c.Abort()
+			"Failed",
+			false,
+			err)
 		return
 	}
 
-	response :=
-		helper.CreateResponse(
-			"Your account successfully registered!",
-			200,
-			"Success",
-			user.FormatRegisterResponse(newUser))
+	helper.SendResponse(
+		c,
+		"Your account successfully registered!",
+		http.StatusOK,
+		"Success",
+		user.FormatRegisterResponse(newUser))
 
-	c.JSON(http.StatusOK, response)
 }
 
 func (handler *userHandler) Login(c *gin.Context) {
@@ -66,36 +61,68 @@ func (handler *userHandler) Login(c *gin.Context) {
 	input := &user.LoginUserInput{}
 
 	err := c.ShouldBindJSON(&input)
-
+	//if validation error
 	if err != nil {
-		errorValidation := gin.H{"errors": helper.FormatValidationError(err)}
-
-		c.JSON(
-			http.StatusBadRequest,
-			helper.CreateResponse("Login failed",
-				http.StatusUnprocessableEntity,
-				"Failed",
-				errorValidation))
-		c.Error(err)
-		c.Abort()
+		helper.SendErrorResponse(
+			c,
+			"Login failed",
+			http.StatusUnprocessableEntity,
+			"Failed",
+			true,
+			err)
 		return
 	}
 
-	foundedUser, err := handler.userService.Login(*input)
+	loggedinUser, err := handler.userService.Login(*input)
 
 	if err != nil {
-		c.JSON(
-			http.StatusBadRequest,
-			helper.CreateResponse("Login failed",
-				http.StatusNotFound,
-				"Failed",
-				gin.H{"errors": err.Error()}))
-		c.Error(err)
-		c.Abort()
+		helper.SendErrorResponse(
+			c,
+			"Login failed",
+			http.StatusNotFound,
+			"Failed",
+			false,
+			err)
 		return
 	}
-	response :=
-		helper.CreateResponse("Your account successfully registered!", 200, "Success", user.FormatRegisterResponse(foundedUser))
 
-	c.JSON(http.StatusOK, response)
+	token := "tokentokentoken"
+
+	helper.SendResponse(
+		c,
+		"You're successfully loggedin!",
+		http.StatusOK,
+		"Success",
+		user.FormatLoginResponse(loggedinUser, token))
+}
+
+func (handler *userHandler) CheckEmailAvailability(c *gin.Context) {
+	input := &user.CheckEmailInput{}
+
+	err := c.ShouldBindJSON(&input)
+
+	if err != nil {
+		helper.SendErrorResponse(
+			c,
+			"Failed to check",
+			http.StatusUnprocessableEntity,
+			"Failed",
+			true,
+			err)
+		return
+	}
+
+	isEmailAvailable, err := handler.userService.IsEmailAvailable(*input)
+
+	responseData := gin.H{
+		"is_available": isEmailAvailable,
+		"email":        input.Email,
+	}
+
+	metaMessage := "Email is registered"
+
+	if isEmailAvailable {
+		metaMessage = "Email is available"
+	}
+	helper.SendResponse(c, metaMessage, http.StatusOK, "Success", responseData)
 }

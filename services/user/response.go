@@ -20,3 +20,12 @@ func FormatRegisterResponse(user User) RegisterResponse {
 		Email:      user.Email,
 	}
 }
+
+func FormatLoginResponse(user User, token string) LoginResponse {
+	return LoginResponse{
+		Name:       user.Name,
+		Occupation: user.Occupation,
+		Email:      user.Email,
+		Token:      token,
+	}
+}

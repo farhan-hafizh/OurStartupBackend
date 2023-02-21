@@ -1,6 +1,9 @@
 package helper
 
-import "github.com/go-playground/validator/v10"
+import (
+	"github.com/gin-gonic/gin"
+	"github.com/go-playground/validator/v10"
+)
 
 type Meta struct {
 	Message string `json:"message"`
@@ -33,6 +36,32 @@ func CreateResponse(message string, code int, status string, data interface{}) R
 	return Response{
 		Meta: meta,
 	}
+}
+
+func SendResponse(c *gin.Context, message string, code int, status string, data interface{}) {
+	c.JSON(
+		code,
+		CreateResponse(message,
+			code,
+			status,
+			data))
+}
+
+func SendErrorResponse(c *gin.Context, message string, code int, status string, isValidationError bool, err error) {
+	var errorText []string
+
+	errorText[0] = err.Error()
+
+	if isValidationError {
+		errorText = FormatValidationError(err)
+	}
+
+	errorResponse := gin.H{"errors": errorText}
+
+	SendResponse(c, message, code, status, errorResponse)
+
+	c.Error(err)
+	c.Abort()
 }
 
 func FormatValidationError(err error) []string {
