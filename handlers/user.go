@@ -4,17 +4,20 @@ import (
 	"fmt"
 	"net/http"
 	"ourstartup/helper"
+	"ourstartup/middlewares/auth"
 	"ourstartup/services/user"
+	"time"
 
 	"github.com/gin-gonic/gin"
 )
 
 type userHandler struct {
 	userService user.Service
+	authService auth.Service
 }
 
-func CreateUserHandler(userService user.Service) *userHandler {
-	return &userHandler{userService}
+func CreateUserHandler(userService user.Service, authService auth.Service) *userHandler {
+	return &userHandler{userService, authService}
 }
 
 func (h *userHandler) RegisterUser(c *gin.Context) {
@@ -60,6 +63,7 @@ func (h *userHandler) Login(c *gin.Context) {
 	input := &user.LoginUserInput{}
 
 	err := c.ShouldBindJSON(&input)
+	fmt.Println(err)
 	//if validation error
 	if err != nil {
 		helper.SendValidationErrorResponse(
@@ -70,7 +74,6 @@ func (h *userHandler) Login(c *gin.Context) {
 			err)
 		return
 	}
-
 	loggedinUser, err := h.userService.Login(*input)
 
 	if err != nil {
@@ -83,7 +86,18 @@ func (h *userHandler) Login(c *gin.Context) {
 		return
 	}
 
-	token := "tokentokentoken"
+	token, err := h.authService.GenerateToken(loggedinUser.Id)
+
+	if err != nil {
+		helper.SendErrorResponse(
+			c,
+			"Login failed",
+			http.StatusInternalServerError,
+			"failed",
+			err, nil)
+		return
+	}
+	fmt.Println("3")
 
 	helper.SendResponse(
 		c,
@@ -141,7 +155,7 @@ func (h *userHandler) UploadAvatar(c *gin.Context) {
 
 	userId := 1
 	// create file path and filename
-	path := fmt.Sprintf("images/avatar-%d-%s", userId, file.Filename)
+	path := fmt.Sprintf("images/avatar-%d-%s", time.Now().Unix(), file.Filename)
 
 	// save uploaded file to filepath with filename
 	err = c.SaveUploadedFile(file, path)

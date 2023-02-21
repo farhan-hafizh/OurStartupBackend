@@ -47,11 +47,8 @@ func SendResponse(c *gin.Context, message string, code int, status string, data 
 }
 
 func SendValidationErrorResponse(c *gin.Context, message string, code int, status string, err error) {
-	var errorText []string
 
-	errorText[0] = err.Error()
-
-	errorText = FormatValidationError(err)
+	errorText := FormatValidationError(err)
 
 	errorResponse := gin.H{"errors": errorText}
 
@@ -64,11 +61,8 @@ func SendValidationErrorResponse(c *gin.Context, message string, code int, statu
 func SendErrorResponse(c *gin.Context, message string, code int, status string, err error, response interface{}) {
 
 	if response == nil {
-		var errorText []string
 
-		errorText[0] = err.Error()
-
-		errorResponse := gin.H{"errors": errorText}
+		errorResponse := gin.H{"errors": err.Error()}
 
 		SendResponse(c, message, code, status, errorResponse)
 	} else {

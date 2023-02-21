@@ -2,6 +2,7 @@ package routers
 
 import (
 	"ourstartup/handlers"
+	"ourstartup/middlewares/auth"
 	"ourstartup/services/user"
 
 	"github.com/gin-gonic/gin"
@@ -11,7 +12,8 @@ import (
 func UserRouters(group *gin.RouterGroup, db *gorm.DB) {
 	userRepository := user.CreateRepository(db)
 	userService := user.CreateService(userRepository)
-	userHandler := handlers.CreateUserHandler(userService)
+	authService := auth.CreateService()
+	userHandler := handlers.CreateUserHandler(userService, authService)
 
 	user := group.Group("users")
 	user.POST("/create", userHandler.RegisterUser)
