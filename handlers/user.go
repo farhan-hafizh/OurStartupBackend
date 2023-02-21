@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"fmt"
 	"net/http"
 	"ourstartup/helper"
 	"ourstartup/services/user"
@@ -16,7 +17,7 @@ func CreateUserHandler(userService user.Service) *userHandler {
 	return &userHandler{userService}
 }
 
-func (handler *userHandler) RegisterUser(c *gin.Context) {
+func (h *userHandler) RegisterUser(c *gin.Context) {
 	// get input register struct
 	input := &user.RegisterUserInput{}
 
@@ -24,26 +25,24 @@ func (handler *userHandler) RegisterUser(c *gin.Context) {
 	err := c.ShouldBindJSON(&input)
 
 	if err != nil {
-		helper.SendErrorResponse(
+		helper.SendValidationErrorResponse(
 			c,
 			"Register account failed",
 			http.StatusUnprocessableEntity,
-			"Failed",
-			true,
+			"failed",
 			err)
 		return
 	}
 
-	newUser, err := handler.userService.RegisterUser(*input)
+	newUser, err := h.userService.RegisterUser(*input)
 
 	if err != nil {
 		helper.SendErrorResponse(
 			c,
 			"Register account failed",
 			http.StatusBadRequest,
-			"Failed",
-			false,
-			err)
+			"failed",
+			err, nil)
 		return
 	}
 
@@ -51,38 +50,36 @@ func (handler *userHandler) RegisterUser(c *gin.Context) {
 		c,
 		"Your account successfully registered!",
 		http.StatusOK,
-		"Success",
+		"success",
 		user.FormatRegisterResponse(newUser))
 
 }
 
-func (handler *userHandler) Login(c *gin.Context) {
+func (h *userHandler) Login(c *gin.Context) {
 	// init temp
 	input := &user.LoginUserInput{}
 
 	err := c.ShouldBindJSON(&input)
 	//if validation error
 	if err != nil {
-		helper.SendErrorResponse(
+		helper.SendValidationErrorResponse(
 			c,
 			"Login failed",
 			http.StatusUnprocessableEntity,
-			"Failed",
-			true,
+			"failed",
 			err)
 		return
 	}
 
-	loggedinUser, err := handler.userService.Login(*input)
+	loggedinUser, err := h.userService.Login(*input)
 
 	if err != nil {
 		helper.SendErrorResponse(
 			c,
 			"Login failed",
 			http.StatusNotFound,
-			"Failed",
-			false,
-			err)
+			"failed",
+			err, nil)
 		return
 	}
 
@@ -92,27 +89,26 @@ func (handler *userHandler) Login(c *gin.Context) {
 		c,
 		"You're successfully loggedin!",
 		http.StatusOK,
-		"Success",
+		"success",
 		user.FormatLoginResponse(loggedinUser, token))
 }
 
-func (handler *userHandler) CheckEmailAvailability(c *gin.Context) {
+func (h *userHandler) CheckEmailAvailability(c *gin.Context) {
 	input := &user.CheckEmailInput{}
 
 	err := c.ShouldBindJSON(&input)
 
 	if err != nil {
-		helper.SendErrorResponse(
+		helper.SendValidationErrorResponse(
 			c,
 			"Failed to check",
 			http.StatusUnprocessableEntity,
-			"Failed",
-			true,
+			"failed",
 			err)
 		return
 	}
 
-	isEmailAvailable, err := handler.userService.IsEmailAvailable(*input)
+	isEmailAvailable, err := h.userService.IsEmailAvailable(*input)
 
 	responseData := gin.H{
 		"is_available": isEmailAvailable,
@@ -124,5 +120,56 @@ func (handler *userHandler) CheckEmailAvailability(c *gin.Context) {
 	if isEmailAvailable {
 		metaMessage = "Email is available"
 	}
-	helper.SendResponse(c, metaMessage, http.StatusOK, "Success", responseData)
+	helper.SendResponse(c, metaMessage, http.StatusOK, "success", responseData)
+}
+
+func (h *userHandler) UploadAvatar(c *gin.Context) {
+	// get file from request with key avatar
+	file, err := c.FormFile("avatar")
+
+	response := gin.H{"is_uploaded": false}
+
+	if err != nil {
+		helper.SendErrorResponse(
+			c,
+			"Failed to upload avatar image",
+			http.StatusBadRequest,
+			"failed",
+			err, response)
+		return
+	}
+
+	userId := 1
+	// create file path and filename
+	path := fmt.Sprintf("images/avatar-%d-%s", userId, file.Filename)
+
+	// save uploaded file to filepath with filename
+	err = c.SaveUploadedFile(file, path)
+
+	if err != nil {
+		helper.SendErrorResponse(
+			c,
+			"Failed to upload avatar image",
+			http.StatusBadRequest,
+			"failed",
+			err, response)
+		return
+	}
+
+	// update user avatar path with id = userId in database with the path
+	_, err = h.userService.SaveAvatar(userId, path)
+
+	if err != nil {
+		helper.SendErrorResponse(
+			c,
+			"Failed to upload avatar image",
+			http.StatusBadRequest,
+			"Failed",
+			err, response)
+		return
+	}
+
+	response = gin.H{"is_uploaded": true}
+
+	helper.SendResponse(c, "Avatar successfully loaded", http.StatusOK, "success", response)
 }

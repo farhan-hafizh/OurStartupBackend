@@ -17,4 +17,5 @@ func UserRouters(group *gin.RouterGroup, db *gorm.DB) {
 	user.POST("/create", userHandler.RegisterUser)
 	user.POST("/login", userHandler.Login)
 	user.POST("/check-email", userHandler.CheckEmailAvailability)
+	user.POST("/upload-avatar", userHandler.UploadAvatar)
 }

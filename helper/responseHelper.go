@@ -2,7 +2,6 @@ package helper
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/go-playground/validator/v10"
 )
 
 type Meta struct {
@@ -47,14 +46,12 @@ func SendResponse(c *gin.Context, message string, code int, status string, data 
 			data))
 }
 
-func SendErrorResponse(c *gin.Context, message string, code int, status string, isValidationError bool, err error) {
+func SendValidationErrorResponse(c *gin.Context, message string, code int, status string, err error) {
 	var errorText []string
 
 	errorText[0] = err.Error()
 
-	if isValidationError {
-		errorText = FormatValidationError(err)
-	}
+	errorText = FormatValidationError(err)
 
 	errorResponse := gin.H{"errors": errorText}
 
@@ -64,14 +61,20 @@ func SendErrorResponse(c *gin.Context, message string, code int, status string, 
 	c.Abort()
 }
 
-func FormatValidationError(err error) []string {
-	var errors []string
+func SendErrorResponse(c *gin.Context, message string, code int, status string, err error, response interface{}) {
 
-	// loop through error that had changed to ValidationErrors type
-	// then append the error to errors
-	for _, e := range err.(validator.ValidationErrors) {
-		errors = append(errors, e.Error())
+	if response == nil {
+		var errorText []string
+
+		errorText[0] = err.Error()
+
+		errorResponse := gin.H{"errors": errorText}
+
+		SendResponse(c, message, code, status, errorResponse)
+	} else {
+		SendResponse(c, message, code, status, response)
 	}
 
-	return errors
+	c.Error(err)
+	c.Abort()
 }
