@@ -11,7 +11,9 @@ import (
 )
 
 func Init() {
+	// load env file
 	config, _ := serverConfig.LoadConfig()
+	// connect to db
 	dsn := config.DBConnection
 	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
 
@@ -20,7 +22,7 @@ func Init() {
 	}
 
 	fmt.Println("Connected to database!")
-
+	// init routers then run routers
 	router := routers.Init(config, db)
 	router.RunRouter()
 }

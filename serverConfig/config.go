@@ -9,11 +9,12 @@ type Config struct {
 	DBConnection     string `mapstructure:"DB_CONNECTION"`
 	EncryptionSecret string `mapstructure:"ENCRYPTION_SECRET"`
 	JWTSecret        string `mapstructure:"JWT_SECRET"`
+	Port             string `mapstructure:"PORT"`
 }
 
 func LoadConfig() (config Config, err error) {
-	viper.AddConfigPath(".")
-	viper.SetConfigName("app")
+	viper.AddConfigPath("./serverConfig/")
+	viper.SetConfigName("development")
 	viper.SetConfigType("env")
 
 	viper.AutomaticEnv()

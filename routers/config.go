@@ -27,8 +27,8 @@ func (r *router) RunRouter() {
 
 	apiV1 := router.Group("/api/v1")
 
-	userRouters := CreateUserRouter(r.db, apiV1, r.config)
-	userRouters.InitRoutes()
+	userRouters := CreateUserRouter(r, apiV1)
+	userRouters.InitRouter()
 
-	router.Run()
+	router.Run(r.config.Port)
 }
