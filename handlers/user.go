@@ -97,7 +97,6 @@ func (h *userHandler) Login(c *gin.Context) {
 			err, nil)
 		return
 	}
-	fmt.Println("3")
 
 	helper.SendResponse(
 		c,

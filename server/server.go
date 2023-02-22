@@ -3,13 +3,16 @@ package server
 import (
 	"fmt"
 	"log"
+	"ourstartup/routers"
+	"ourstartup/serverConfig"
 
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 )
 
 func Init() {
-	dsn := "root:root@tcp(127.0.0.1:3306)/ourstartup?charset=utf8mb4&parseTime=True&loc=Local"
+	config, _ := serverConfig.LoadConfig()
+	dsn := config.DBConnection
 	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
 
 	if err != nil {
@@ -18,6 +21,6 @@ func Init() {
 
 	fmt.Println("Connected to database!")
 
-	r := NewRouter(db)
-	r.Run()
+	router := routers.Init(config, db)
+	router.RunRouter()
 }

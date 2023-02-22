@@ -9,16 +9,14 @@ import (
 	"io"
 )
 
-var SECRETE_KEY = "S3CR3T3"
-
 func createHash(key string) string {
 	hasher := md5.New()
 	hasher.Write([]byte(key))
 	return hex.EncodeToString(hasher.Sum(nil))
 }
 
-func Encrypt(data []byte) []byte {
-	block, _ := aes.NewCipher([]byte(createHash(SECRETE_KEY)))
+func Encrypt(data []byte, secreteKey string) []byte {
+	block, _ := aes.NewCipher([]byte(createHash(secreteKey)))
 	gcm, err := cipher.NewGCM(block)
 	if err != nil {
 		panic(err.Error())
@@ -31,8 +29,8 @@ func Encrypt(data []byte) []byte {
 	return ciphertext
 }
 
-func Decrypt(data []byte) []byte {
-	key := []byte(createHash(SECRETE_KEY))
+func Decrypt(data []byte, secreteKey string) []byte {
+	key := []byte(createHash(secreteKey))
 	block, err := aes.NewCipher(key)
 	if err != nil {
 		panic(err.Error())

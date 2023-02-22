@@ -11,12 +11,12 @@ type Service interface {
 	ValidateToken(token string) (*jwt.Token, error)
 }
 
-type jwtService struct{}
+type jwtService struct {
+	secretKey string
+}
 
-var SECRETE_KEY = []byte("S3CR3T3")
-
-func CreateService() *jwtService {
-	return &jwtService{}
+func CreateService(secretKey string) *jwtService {
+	return &jwtService{secretKey}
 }
 
 func (s *jwtService) GenerateToken(userId int) (string, error) {
@@ -27,7 +27,7 @@ func (s *jwtService) GenerateToken(userId int) (string, error) {
 	// create token
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claim)
 	// sign token
-	signedToken, err := token.SignedString(SECRETE_KEY)
+	signedToken, err := token.SignedString(s.secretKey)
 
 	if err != nil {
 		return signedToken, nil
@@ -46,7 +46,7 @@ func (s *jwtService) ValidateToken(token string) (*jwt.Token, error) {
 			return nil, errors.New("Invalid token")
 		}
 		// if ok, retun the byte so it can be used in jwt.Parse
-		return []byte(SECRETE_KEY), nil
+		return []byte(s.secretKey), nil
 	})
 
 	if err != nil {
