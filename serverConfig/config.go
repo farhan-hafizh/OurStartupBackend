@@ -12,9 +12,16 @@ type Config struct {
 	Port             string `mapstructure:"PORT"`
 }
 
-func LoadConfig() (config Config, err error) {
+func LoadConfig(mode string) (config Config, err error) {
+
 	viper.AddConfigPath("./serverConfig/")
-	viper.SetConfigName("development")
+
+	if mode == "development" {
+		viper.SetConfigName("development")
+	} else if mode == "production" {
+		viper.SetConfigName("development")
+	}
+
 	viper.SetConfigType("env")
 
 	viper.AutomaticEnv()
