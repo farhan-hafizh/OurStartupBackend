@@ -1,6 +1,7 @@
 package routers
 
 import (
+	"fmt"
 	"ourstartup/serverConfig"
 
 	"github.com/gin-gonic/gin"
@@ -30,5 +31,8 @@ func (r *router) RunRouter() {
 	userRouters := CreateUserRouter(r, apiV1)
 	userRouters.InitRouter()
 
-	router.Run(r.config.Port)
+	err := router.Run(fmt.Sprintf(":%s", r.config.Port))
+	if err != nil {
+		panic("[Error] failed to start Gin server due to: " + err.Error())
+	}
 }

@@ -2,7 +2,7 @@ package routers
 
 import (
 	"ourstartup/handlers"
-	"ourstartup/middlewares/auth"
+	"ourstartup/middlewares/authMiddleware"
 	"ourstartup/services/user"
 
 	"github.com/gin-gonic/gin"
@@ -24,12 +24,15 @@ func CreateUserRouter(router *router, group *gin.RouterGroup) *userRouters {
 func (ur *userRouters) InitRouter() {
 	userRepository := user.CreateRepository(ur.router.db)
 	userService := user.CreateService(userRepository)
-	authService := auth.CreateService(ur.router.config.JWTSecret)
+
+	authService := authMiddleware.CreateService(ur.router.config.JWTSecret)
+	authMiddleware := authMiddleware.CreateAuthMiddleware(authService, userService)
+
 	userHandler := handlers.CreateUserHandler(userService, authService)
 
 	user := ur.group.Group("users")
 	user.POST("/create", userHandler.RegisterUser)
 	user.POST("/login", userHandler.Login)
 	user.POST("/check-email", userHandler.CheckEmailAvailability)
-	user.POST("/upload-avatar", userHandler.UploadAvatar)
+	user.POST("/upload-avatar", authMiddleware.GetAuthMiddleware(), userHandler.UploadAvatar)
 }

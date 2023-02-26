@@ -1,6 +1,7 @@
-package auth
+package authMiddleware
 
 import (
+	"encoding/base64"
 	"errors"
 
 	"github.com/golang-jwt/jwt"
@@ -27,18 +28,21 @@ func (s *jwtService) GenerateToken(userId int) (string, error) {
 	// create token
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claim)
 	// sign token
-	signedToken, err := token.SignedString(s.secretKey)
+	signedToken, err := token.SignedString([]byte(s.secretKey))
 
 	if err != nil {
-		return signedToken, nil
+		return signedToken, err
 	}
 
-	return signedToken, nil
+	base64Token := base64.StdEncoding.EncodeToString([]byte(signedToken))
+
+	return base64Token, nil
 }
 
-func (s *jwtService) ValidateToken(token string) (*jwt.Token, error) {
+func (s *jwtService) ValidateToken(paramToken string) (*jwt.Token, error) {
+	token, err := base64.StdEncoding.DecodeString(paramToken)
 	// parse a token with key function that return any type(interface{}) and error
-	decodedToken, err := jwt.Parse(token, func(t *jwt.Token) (interface{}, error) {
+	decodedToken, err := jwt.Parse(string(token), func(t *jwt.Token) (interface{}, error) {
 		// check if the token is signed with HMAC method
 		_, ok := t.Method.(*jwt.SigningMethodHMAC)
 		// if not return the invalid token error

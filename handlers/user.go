@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"net/http"
 	"ourstartup/helper"
-	"ourstartup/middlewares/auth"
+	"ourstartup/middlewares/authMiddleware"
 	"ourstartup/services/user"
 	"time"
 
@@ -13,10 +13,10 @@ import (
 
 type userHandler struct {
 	userService user.Service
-	authService auth.Service
+	authService authMiddleware.Service
 }
 
-func CreateUserHandler(userService user.Service, authService auth.Service) *userHandler {
+func CreateUserHandler(userService user.Service, authService authMiddleware.Service) *userHandler {
 	return &userHandler{userService, authService}
 }
 
@@ -59,11 +59,12 @@ func (h *userHandler) RegisterUser(c *gin.Context) {
 }
 
 func (h *userHandler) Login(c *gin.Context) {
+
 	// init temp
 	input := &user.LoginUserInput{}
 
 	err := c.ShouldBindJSON(&input)
-	fmt.Println(err)
+
 	//if validation error
 	if err != nil {
 		helper.SendValidationErrorResponse(
@@ -97,13 +98,13 @@ func (h *userHandler) Login(c *gin.Context) {
 			err, nil)
 		return
 	}
-
+	response := user.FormatLoginResponse(loggedinUser, token)
 	helper.SendResponse(
 		c,
 		"You're successfully loggedin!",
 		http.StatusOK,
 		"success",
-		user.FormatLoginResponse(loggedinUser, token))
+		response)
 }
 
 func (h *userHandler) CheckEmailAvailability(c *gin.Context) {
@@ -151,8 +152,9 @@ func (h *userHandler) UploadAvatar(c *gin.Context) {
 			err, response)
 		return
 	}
-
-	userId := 1
+	// get user from context data
+	user := c.MustGet("loggedInUser").(user.User)
+	userId := user.Id
 	// create file path and filename
 	path := fmt.Sprintf("images/avatar-%d-%s", time.Now().Unix(), file.Filename)
 

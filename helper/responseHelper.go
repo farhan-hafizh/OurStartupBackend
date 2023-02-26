@@ -59,16 +59,21 @@ func SendValidationErrorResponse(c *gin.Context, message string, code int, statu
 }
 
 func SendErrorResponse(c *gin.Context, message string, code int, status string, err error, response interface{}) {
+	var jsonResponse Response
 
-	if response == nil {
-
+	if err == nil && response == nil {
+		// empty response error
+		jsonResponse = CreateResponse(message, code, status, nil)
+	} else if response == nil {
+		// error with error type data
 		errorResponse := gin.H{"errors": err.Error()}
-
-		SendResponse(c, message, code, status, errorResponse)
+		c.Error(err)
+		jsonResponse = CreateResponse(message, code, status, errorResponse)
 	} else {
-		SendResponse(c, message, code, status, response)
+		// custom error
+		jsonResponse = CreateResponse(message, code, status, response)
 	}
 
-	c.Error(err)
 	c.Abort()
+	c.JSON(code, jsonResponse)
 }
