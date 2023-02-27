@@ -1,8 +1,8 @@
 package authMiddleware
 
 import (
-	"encoding/base64"
 	"errors"
+	"ourstartup/helper"
 	"ourstartup/services/user"
 
 	"github.com/golang-jwt/jwt"
@@ -14,11 +14,12 @@ type Service interface {
 }
 
 type jwtService struct {
-	secretKey string
+	jwtSecreteKey string
+	encryptionKey string
 }
 
-func CreateService(secretKey string) *jwtService {
-	return &jwtService{secretKey}
+func CreateService(jwtSecreteKey string, encryptionKey string) *jwtService {
+	return &jwtService{jwtSecreteKey, encryptionKey}
 }
 
 func (s *jwtService) GenerateToken(user user.User) (string, error) {
@@ -29,19 +30,18 @@ func (s *jwtService) GenerateToken(user user.User) (string, error) {
 	// create token
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claim)
 	// sign token
-	signedToken, err := token.SignedString([]byte(s.secretKey))
+	signedToken, err := token.SignedString([]byte(s.jwtSecreteKey))
 
 	if err != nil {
 		return signedToken, err
 	}
+	base64Token, _ := helper.Encrypt([]byte(signedToken), []byte(s.encryptionKey))
 
-	base64Token := base64.StdEncoding.EncodeToString([]byte(signedToken))
-
-	return base64Token, nil
+	return string(base64Token), nil
 }
 
 func (s *jwtService) ValidateToken(paramToken string) (*jwt.Token, error) {
-	token, err := base64.StdEncoding.DecodeString(paramToken)
+	token, err := helper.Decrypt(paramToken, []byte(s.encryptionKey))
 	// parse a token with key function that return any type(interface{}) and error
 	decodedToken, err := jwt.Parse(string(token), func(t *jwt.Token) (interface{}, error) {
 		// check if the token is signed with HMAC method
@@ -51,7 +51,7 @@ func (s *jwtService) ValidateToken(paramToken string) (*jwt.Token, error) {
 			return nil, errors.New("Invalid token")
 		}
 		// if ok, retun the byte so it can be used in jwt.Parse
-		return []byte(s.secretKey), nil
+		return []byte(s.jwtSecreteKey), nil
 	})
 
 	if err != nil {

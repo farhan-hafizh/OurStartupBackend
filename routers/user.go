@@ -25,8 +25,8 @@ func (ur *userRouters) InitRouter() {
 	userRepository := user.CreateRepository(ur.router.db)
 	userService := user.CreateService(userRepository)
 
-	authService := authMiddleware.CreateService(ur.router.config.JWTSecret)
-	authMiddleware := authMiddleware.CreateAuthMiddleware(authService, userService)
+	authService := authMiddleware.CreateService(ur.router.config.JWTSecret, ur.router.config.EncryptionSecret)
+	authMiddleware := authMiddleware.CreateAuthMiddleware(authService)
 
 	userHandler := handlers.CreateUserHandler(userService, authService)
 
