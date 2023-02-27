@@ -31,6 +31,9 @@ func (r *router) RunRouter() {
 	userRouters := CreateUserRouter(r, apiV1)
 	userRouters.InitRouter()
 
+	campaignRouters := CreateCampaignRouter(r, apiV1)
+	campaignRouters.InitRouter()
+
 	err := router.Run(fmt.Sprintf(":%s", r.config.Port))
 	if err != nil {
 		panic("[Error] failed to start Gin server due to: " + err.Error())
