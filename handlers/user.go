@@ -87,7 +87,7 @@ func (h *userHandler) Login(c *gin.Context) {
 		return
 	}
 
-	token, err := h.authService.GenerateToken(loggedinUser.Id)
+	token, err := h.authService.GenerateToken(loggedinUser)
 
 	if err != nil {
 		helper.SendErrorResponse(

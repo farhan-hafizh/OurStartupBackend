@@ -1,11 +1,11 @@
 package authMiddleware
 
 import (
+	"encoding/json"
 	"net/http"
 
-	"ourstartup/services/user"
-
 	"ourstartup/helper"
+	"ourstartup/services/user"
 	"strings"
 
 	"github.com/gin-gonic/gin"
@@ -17,12 +17,11 @@ type AuthMiddlerware interface {
 }
 
 type middleware struct {
-	service     Service
-	userService user.Service
+	service Service
 }
 
-func CreateAuthMiddleware(service Service, userService user.Service) *middleware {
-	return &middleware{service, userService}
+func CreateAuthMiddleware(service Service) *middleware {
+	return &middleware{service}
 }
 
 func (m *middleware) GetAuthMiddleware() gin.HandlerFunc {
@@ -52,9 +51,11 @@ func (m *middleware) GetAuthMiddleware() gin.HandlerFunc {
 			return
 		}
 		// get id from claim (by default is float64) then convert it to int
-		userId := int(claim["user_id"].(float64))
-		// get user by id
-		user, err := m.userService.GetUserById(userId)
+		userClaim := claim["user"]
+
+		jsonString, _ := json.Marshal(userClaim)
+		user := user.User{}
+		json.Unmarshal(jsonString, &user)
 
 		if err != nil {
 			helper.SendErrorResponse(c, "Unauthorized", http.StatusUnauthorized, "error", nil, nil)

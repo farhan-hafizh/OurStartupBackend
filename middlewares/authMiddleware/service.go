@@ -3,12 +3,13 @@ package authMiddleware
 import (
 	"encoding/base64"
 	"errors"
+	"ourstartup/services/user"
 
 	"github.com/golang-jwt/jwt"
 )
 
 type Service interface {
-	GenerateToken(userId int) (string, error)
+	GenerateToken(user user.User) (string, error)
 	ValidateToken(token string) (*jwt.Token, error)
 }
 
@@ -20,11 +21,11 @@ func CreateService(secretKey string) *jwtService {
 	return &jwtService{secretKey}
 }
 
-func (s *jwtService) GenerateToken(userId int) (string, error) {
+func (s *jwtService) GenerateToken(user user.User) (string, error) {
 	// create claim object
 	claim := jwt.MapClaims{}
 	// initiate claim
-	claim["user_id"] = userId
+	claim["user"] = user
 	// create token
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claim)
 	// sign token
