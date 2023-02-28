@@ -5,23 +5,31 @@ import (
 	"ourstartup/helper"
 	"ourstartup/services/campaign"
 	"ourstartup/services/user"
-	"strconv"
 
 	"github.com/gin-gonic/gin"
 )
 
 type campaignHandler struct {
-	service campaign.Service
+	service     campaign.Service
+	userService user.Service
 }
 
-func CreateCampaignHandler(service campaign.Service) *campaignHandler {
-	return &campaignHandler{service}
+func CreateCampaignHandler(service campaign.Service, userService user.Service) *campaignHandler {
+	return &campaignHandler{service, userService}
 }
 
 func (h *campaignHandler) GetCampaigns(c *gin.Context) {
-	userId, _ := strconv.Atoi(c.Query("user_id"))
-
-	campaigns, err := h.service.GetCampaigns(userId)
+	username := c.Query("username")
+	user, err := h.userService.GetUserByUsername(username)
+	if err != nil {
+		helper.SendErrorResponse(
+			c,
+			"Failed to get campaign! No user found with that username!",
+			http.StatusBadRequest,
+			"failed", err, nil)
+		return
+	}
+	campaigns, err := h.service.GetCampaigns(user.Id)
 
 	if err != nil {
 		helper.SendErrorResponse(
@@ -39,8 +47,8 @@ func (h *campaignHandler) GetCampaigns(c *gin.Context) {
 			"failed", nil, nil)
 		return
 	}
-
-	helper.SendResponse(c, "Successfully get campaigns!", http.StatusOK, "success", campaigns)
+	formattedCampaigns := campaign.FormatCampaignsResponse(campaigns)
+	helper.SendResponse(c, "Successfully get campaigns!", http.StatusOK, "success", formattedCampaigns)
 
 }
 
@@ -61,7 +69,7 @@ func (h *campaignHandler) CreateCampaign(c *gin.Context) {
 	userData := c.MustGet("loggedInUser").(user.User)
 	userId := userData.Id
 
-	campaign, err := h.service.CreateCampaign(userId, *input)
+	newCampaign, err := h.service.CreateCampaign(userId, *input)
 
 	if err != nil {
 		helper.SendErrorResponse(
@@ -72,5 +80,7 @@ func (h *campaignHandler) CreateCampaign(c *gin.Context) {
 		return
 	}
 
-	helper.SendResponse(c, "Campaign successfully created!", http.StatusOK, "success", campaign)
+	formattedCampaign := campaign.FormatCampaignResponse(newCampaign)
+
+	helper.SendResponse(c, "Campaign successfully created!", http.StatusOK, "success", formattedCampaign)
 }

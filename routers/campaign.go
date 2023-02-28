@@ -4,6 +4,7 @@ import (
 	"ourstartup/handlers"
 	"ourstartup/middlewares/authMiddleware"
 	"ourstartup/services/campaign"
+	"ourstartup/services/user"
 
 	"github.com/gin-gonic/gin"
 )
@@ -24,11 +25,13 @@ func CreateCampaignRouter(router *router, group *gin.RouterGroup) *campaignRoute
 func (ur *campaignRouters) InitRouter() {
 	repository := campaign.CreateRepository(ur.router.db)
 	service := campaign.CreateService(repository)
+	userRepository := user.CreateRepository(ur.router.db)
+	userService := user.CreateService(userRepository)
 
 	authService := authMiddleware.CreateService(ur.router.config.JWTSecret, ur.router.config.EncryptionSecret)
 	authMiddleware := authMiddleware.CreateAuthMiddleware(authService)
 
-	handler := handlers.CreateCampaignHandler(service)
+	handler := handlers.CreateCampaignHandler(service, userService)
 
 	campaign := ur.group.Group("campaign")
 
