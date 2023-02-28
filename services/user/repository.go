@@ -5,12 +5,12 @@ import "gorm.io/gorm"
 // used for interacting with service
 type Repository interface {
 	Save(user User) (User, error)
-	FindByEmail(email string) (User, error)
+	FindByQuery(query string) (User, error)
 	FindById(id int) (User, error)
 	Update(user User) (User, error)
 }
 
-//private
+// private
 type repository struct {
 	//variable with type gorm.DB
 	db *gorm.DB
@@ -36,11 +36,11 @@ func (r *repository) Save(user User) (User, error) {
 	return user, nil
 }
 
-func (r *repository) FindByEmail(email string) (User, error) {
+func (r *repository) FindByQuery(query string) (User, error) {
 	// init variable with type user
 	var user User
 	// find in table user where email = email and save it to variable user
-	err := r.db.Where("email = ?", email).Find(&user).Error
+	err := r.db.Where("email = ?", query).Or("username = ?", query).Find(&user).Error
 	//if error return user and the error
 	if err != nil {
 		return user, err

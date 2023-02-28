@@ -31,6 +31,7 @@ func (s *service) RegisterUser(input RegisterUserInput) (User, error) {
 	user.Name = input.Name
 	user.Email = input.Email
 	user.Occupation = input.Occupation
+	user.Username = input.Username
 
 	// create password hash with converted string to byte input password and cost
 	password, err := bcrypt.GenerateFromPassword([]byte(input.Password), bcrypt.DefaultCost)
@@ -54,10 +55,10 @@ func (s *service) RegisterUser(input RegisterUserInput) (User, error) {
 
 func (s *service) Login(input LoginUserInput) (User, error) {
 
-	email := input.Email
+	query := input.Query
 	password := input.Password
 
-	user, err := s.repository.FindByEmail(email)
+	user, err := s.repository.FindByQuery(query)
 
 	if err != nil {
 		return user, err
@@ -78,7 +79,7 @@ func (s *service) Login(input LoginUserInput) (User, error) {
 
 func (s *service) IsEmailAvailable(input CheckEmailInput) (bool, error) {
 
-	user, err := s.repository.FindByEmail(input.Email)
+	user, err := s.repository.FindByQuery(input.Email)
 
 	if err != nil {
 		return false, err
