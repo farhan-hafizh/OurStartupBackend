@@ -29,7 +29,7 @@ func (ur *campaignRouters) InitRouter() {
 	userService := user.CreateService(userRepository)
 
 	authService := authMiddleware.CreateService(ur.router.config.JWTSecret, ur.router.config.EncryptionSecret)
-	authMiddleware := authMiddleware.CreateAuthMiddleware(authService)
+	authMiddleware := authMiddleware.CreateAuthMiddleware(authService, userService)
 
 	handler := handlers.CreateCampaignHandler(service, userService)
 

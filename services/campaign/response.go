@@ -1,12 +1,15 @@
 package campaign
 
+import "ourstartup/services/user"
+
 type CampaignResponse struct {
-	Id               int    `json:"id"`
-	Name             string `json:"name"`
-	ShortDescription string `json:"short_description"`
-	ImageUrl         string `json:"image_url"`
-	GoalAmount       int    `json:"goal_amount"`
-	CurrentAmount    int    `json:"current_amount"`
+	Id               int                    `json:"id"`
+	Name             string                 `json:"name"`
+	Creator          user.UserBasicResponse `json:"creator"`
+	ShortDescription string                 `json:"short_description"`
+	ImageUrl         string                 `json:"image_url"`
+	GoalAmount       int                    `json:"goal_amount"`
+	CurrentAmount    int                    `json:"current_amount"`
 }
 
 func FormatCampaignResponse(campaign Campaign) CampaignResponse {
@@ -18,6 +21,7 @@ func FormatCampaignResponse(campaign Campaign) CampaignResponse {
 
 	return CampaignResponse{
 		Id:               campaign.Id,
+		Creator:          user.FormatUserBasicResponse(campaign.Users),
 		Name:             campaign.Name,
 		ShortDescription: campaign.ShortDescription,
 		GoalAmount:       campaign.GoalAmount,

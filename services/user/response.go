@@ -1,33 +1,38 @@
 package user
 
-type RegisterResponse struct {
+type UserBasicResponse struct {
 	Name       string `json:"name"`
 	Occupation string `json:"occupation"`
-	Email      string `json:"email"`
 	Username   string `json:"username"`
+}
+type RegisterResponse struct {
+	UserBasicResponse        //embed
+	Email             string `json:"email"`
 }
 
 type LoginResponse struct {
-	Name       string `json:"name"`
-	Occupation string `json:"occupation"`
-	Username   string `json:"username"`
-	Token      string `json:"token"`
+	UserBasicResponse        //embed
+	Token             string `json:"token"`
+}
+
+func FormatUserBasicResponse(user User) UserBasicResponse {
+	return UserBasicResponse{
+		Name:       user.Name,
+		Occupation: user.Occupation,
+		Username:   user.Username,
+	}
 }
 
 func FormatRegisterResponse(user User) RegisterResponse {
 	return RegisterResponse{
-		Name:       user.Name,
-		Occupation: user.Occupation,
-		Email:      user.Email,
-		Username:   user.Username,
+		UserBasicResponse: FormatUserBasicResponse(user),
+		Email:             user.Email,
 	}
 }
 
 func FormatLoginResponse(user User, token string) LoginResponse {
 	return LoginResponse{
-		Name:       user.Name,
-		Occupation: user.Occupation,
-		Username:   user.Username,
-		Token:      token,
+		UserBasicResponse: FormatUserBasicResponse(user),
+		Token:             token,
 	}
 }
