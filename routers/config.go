@@ -2,7 +2,8 @@ package routers
 
 import (
 	"fmt"
-	"ourstartup/serverConfig"
+	"net/http"
+	"ourstartup/config"
 
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
@@ -13,11 +14,11 @@ type Routers interface {
 }
 
 type router struct {
-	config serverConfig.Config
+	config config.Config
 	db     *gorm.DB
 }
 
-func Init(config serverConfig.Config, db *gorm.DB) *router {
+func Init(config config.Config, db *gorm.DB) *router {
 	return &router{config, db}
 }
 
@@ -26,11 +27,16 @@ func (r *router) RunRouter() {
 	router.Use(gin.Logger())
 	router.Use(gin.Recovery())
 
+	// static routes
+	router.StaticFS("/images", http.Dir("images"))
+
 	apiV1 := router.Group("/api/v1")
 
+	// user routes
 	userRouters := CreateUserRouter(r, apiV1)
 	userRouters.InitRouter()
 
+	// campaign routes
 	campaignRouters := CreateCampaignRouter(r, apiV1)
 	campaignRouters.InitRouter()
 

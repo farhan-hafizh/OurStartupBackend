@@ -3,8 +3,8 @@ package server
 import (
 	"fmt"
 	"log"
+	"ourstartup/config"
 	"ourstartup/routers"
-	"ourstartup/serverConfig"
 
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
@@ -12,9 +12,12 @@ import (
 
 func Init(mode string) {
 	// load env file
-	config, _ := serverConfig.LoadConfig(mode)
+	configData, _ := config.LoadConfig(mode)
+	fmt.Println(configData)
 	// connect to db
-	dsn := config.DBConnection
+	dsn := configData.DBConnection
+	fmt.Println(dsn)
+
 	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
 
 	if err != nil {
@@ -23,6 +26,6 @@ func Init(mode string) {
 
 	fmt.Println("Connected to database!")
 	// init routers then run routers
-	router := routers.Init(config, db)
+	router := routers.Init(configData, db)
 	router.RunRouter()
 }

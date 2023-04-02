@@ -29,6 +29,7 @@ func (h *campaignHandler) GetCampaigns(c *gin.Context) {
 			"failed", err, nil)
 		return
 	}
+	// send user id neither it nil or not
 	campaigns, err := h.service.GetCampaigns(user.Id)
 
 	if err != nil {
@@ -39,14 +40,7 @@ func (h *campaignHandler) GetCampaigns(c *gin.Context) {
 			"failed", err, nil)
 		return
 	}
-	if len(campaigns) == 0 {
-		helper.SendErrorResponse(
-			c,
-			"Campaigns not found!",
-			http.StatusNoContent,
-			"failed", nil, nil)
-		return
-	}
+
 	formattedCampaigns := campaign.FormatCampaignsResponse(campaigns)
 	helper.SendResponse(c, "Successfully get campaigns!", http.StatusOK, "success", formattedCampaigns)
 
@@ -79,8 +73,41 @@ func (h *campaignHandler) CreateCampaign(c *gin.Context) {
 			"failed", err, nil)
 		return
 	}
+	newCampaign.User.Name = userData.Name
+	newCampaign.User.Username = userData.Username
+	newCampaign.User.Occupation = userData.Occupation
 
 	formattedCampaign := campaign.FormatCampaignResponse(newCampaign)
 
 	helper.SendResponse(c, "Campaign successfully created!", http.StatusOK, "success", formattedCampaign)
+}
+
+func (h *campaignHandler) GetCampaignDetail(c *gin.Context) {
+	var input campaign.GetCampaignSlugInput
+
+	err := c.ShouldBindUri(&input)
+
+	if err != nil {
+		helper.SendValidationErrorResponse(
+			c,
+			"Get campaign detail failed!",
+			http.StatusUnprocessableEntity,
+			"failed",
+			err)
+		return
+	}
+
+	campaignData, err := h.service.GetCampaignBySlug(input.Slug)
+
+	if err != nil {
+		helper.SendErrorResponse(
+			c,
+			"Get campaign detail failed!",
+			http.StatusInternalServerError,
+			"failed", err, nil)
+		return
+	}
+	formattedCampaign := campaign.FormatDetailCampaignResponse(campaignData)
+
+	helper.SendResponse(c, "Successfully get campaign detail!", http.StatusOK, "success", formattedCampaign)
 }

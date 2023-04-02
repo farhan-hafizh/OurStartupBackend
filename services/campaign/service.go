@@ -3,6 +3,7 @@ package campaign
 type Service interface {
 	CreateCampaign(userId int, input CreateCampaignInput) (Campaign, error)
 	GetCampaigns(userId int) ([]Campaign, error)
+	GetCampaignBySlug(slug string) (Campaign, error)
 }
 
 type service struct {
@@ -53,4 +54,14 @@ func (s *service) CreateCampaign(userId int, input CreateCampaignInput) (Campaig
 	}
 
 	return newCampaign, nil
+}
+
+func (s *service) GetCampaignBySlug(slug string) (Campaign, error) {
+	campaign, err := s.repository.FindBySlug(slug)
+
+	if err != nil {
+		return campaign, err
+	}
+
+	return campaign, nil
 }

@@ -25,6 +25,7 @@ func CreateCampaignRouter(router *router, group *gin.RouterGroup) *campaignRoute
 func (ur *campaignRouters) InitRouter() {
 	repository := campaign.CreateRepository(ur.router.db)
 	service := campaign.CreateService(repository)
+
 	userRepository := user.CreateRepository(ur.router.db)
 	userService := user.CreateService(userRepository)
 
@@ -37,4 +38,5 @@ func (ur *campaignRouters) InitRouter() {
 
 	campaign.GET("/", authMiddleware.GetAuthMiddleware(), handler.GetCampaigns)
 	campaign.POST("/create", authMiddleware.GetAuthMiddleware(), handler.CreateCampaign)
+	campaign.GET("/:slug", authMiddleware.GetAuthMiddleware(), handler.GetCampaignDetail)
 }

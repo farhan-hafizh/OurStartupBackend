@@ -7,3 +7,7 @@ type CreateCampaignInput struct {
 	GoalAmount       int    `json:"goal_amount" binding:"required"`
 	Perks            string `json:"perks" binding:"required"`
 }
+
+type GetCampaignSlugInput struct {
+	Slug string `uri:"slug" binding:"required`
+}

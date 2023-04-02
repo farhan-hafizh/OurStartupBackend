@@ -5,6 +5,12 @@ type UserBasicResponse struct {
 	Occupation string `json:"occupation"`
 	Username   string `json:"username"`
 }
+
+type UserWithProfileResponse struct {
+	UserBasicResponse        // embed
+	AvatarFile        string `json:"avatar_url"`
+}
+
 type RegisterResponse struct {
 	UserBasicResponse        //embed
 	Email             string `json:"email"`
@@ -20,6 +26,12 @@ func FormatUserBasicResponse(user User) UserBasicResponse {
 		Name:       user.Name,
 		Occupation: user.Occupation,
 		Username:   user.Username,
+	}
+}
+func FormatUserWithProfileResponse(user User) UserWithProfileResponse {
+	return UserWithProfileResponse{
+		UserBasicResponse: FormatUserBasicResponse(user),
+		AvatarFile:        user.AvatarFileName,
 	}
 }
 

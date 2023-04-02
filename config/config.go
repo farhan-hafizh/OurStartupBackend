@@ -1,4 +1,4 @@
-package serverConfig
+package config
 
 import (
 	"github.com/spf13/viper"
@@ -14,7 +14,7 @@ type Config struct {
 
 func LoadConfig(mode string) (config Config, err error) {
 
-	viper.AddConfigPath("./serverConfig/")
+	viper.AddConfigPath("./config/")
 
 	if mode == "development" {
 		viper.SetConfigName("development")

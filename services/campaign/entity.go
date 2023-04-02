@@ -8,7 +8,7 @@ import (
 type Campaign struct {
 	Id               int             `json:"id"`
 	CreatorId        int             `json:"creator_id`
-	Users            user.User       `gorm:"foreignKey:CreatorId"` //refer CreatorId as user's foreign key
+	User             user.User       `gorm:"foreignKey:CreatorId"` //refer CreatorId as user's foreign key
 	Name             string          `json:"name"`
 	ShortDescription string          `json:"short_description"`
 	Description      string          `json:"description"`
