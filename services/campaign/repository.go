@@ -7,6 +7,7 @@ type Repository interface {
 	FindBySlug(slug string) (Campaign, error)
 	FindAll() ([]Campaign, error)
 	FindByCreatorId(id int) ([]Campaign, error)
+	Update(campaign Campaign) (Campaign, error)
 }
 
 type repository struct {
@@ -64,4 +65,14 @@ func (r *repository) FindByCreatorId(id int) ([]Campaign, error) {
 	}
 
 	return campaigns, nil
+}
+
+func (r *repository) Update(campaign Campaign) (Campaign, error) {
+
+	err := r.db.Save(&campaign).Error
+
+	if err != nil {
+		return campaign, err
+	}
+	return campaign, nil
 }

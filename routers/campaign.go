@@ -38,5 +38,6 @@ func (ur *campaignRouters) InitRouter() {
 
 	campaign.GET("/", authMiddleware.GetAuthMiddleware(), handler.GetCampaigns)
 	campaign.POST("/create", authMiddleware.GetAuthMiddleware(), handler.CreateCampaign)
+	campaign.PUT("/:slug", authMiddleware.GetAuthMiddleware(), handler.UpdateCampaign)
 	campaign.GET("/:slug", authMiddleware.GetAuthMiddleware(), handler.GetCampaignDetail)
 }

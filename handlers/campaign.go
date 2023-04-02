@@ -97,7 +97,7 @@ func (h *campaignHandler) GetCampaignDetail(c *gin.Context) {
 		return
 	}
 
-	campaignData, err := h.service.GetCampaignBySlug(input.Slug)
+	campaignData, err := h.service.GetCampaignBySlug(input)
 
 	if err != nil {
 		helper.SendErrorResponse(
@@ -110,4 +110,56 @@ func (h *campaignHandler) GetCampaignDetail(c *gin.Context) {
 	formattedCampaign := campaign.FormatDetailCampaignResponse(campaignData)
 
 	helper.SendResponse(c, "Successfully get campaign detail!", http.StatusOK, "success", formattedCampaign)
+}
+
+func (h *campaignHandler) UpdateCampaign(c *gin.Context) {
+	var slugData campaign.GetCampaignSlugInput
+
+	err := c.ShouldBindUri(&slugData)
+
+	if err != nil {
+		helper.SendValidationErrorResponse(
+			c,
+			"Update campaign failed!",
+			http.StatusUnprocessableEntity,
+			"failed",
+			err)
+		return
+	}
+
+	var inputCampaign campaign.CreateCampaignInput
+
+	err = c.ShouldBindJSON(&inputCampaign)
+
+	if err != nil {
+		helper.SendValidationErrorResponse(
+			c,
+			"Update campaign failed!",
+			http.StatusUnprocessableEntity,
+			"failed",
+			err)
+		return
+	}
+
+	userData := c.MustGet("loggedInUser").(user.User)
+
+	updatedCampaign, err := h.service.UpdateCampaign(slugData, userData.Id, inputCampaign)
+
+	if err != nil {
+		helper.SendErrorResponse(
+			c,
+			"Update campaign failed!",
+			http.StatusInternalServerError,
+			"failed", err, nil)
+		return
+	}
+
+	updatedCampaign.User.Name = userData.Name
+	updatedCampaign.User.Username = userData.Username
+	updatedCampaign.User.Occupation = userData.Occupation
+
+	formattedCampaign := campaign.FormatCampaignResponse(updatedCampaign)
+
+	helper.SendResponse(c, "Campaign successfully updated!", http.StatusOK, "success", formattedCampaign)
+
 }

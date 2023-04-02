@@ -1,9 +1,18 @@
 package campaign
 
+import (
+	"errors"
+	"fmt"
+	"time"
+
+	"github.com/gosimple/slug"
+)
+
 type Service interface {
 	CreateCampaign(userId int, input CreateCampaignInput) (Campaign, error)
 	GetCampaigns(userId int) ([]Campaign, error)
-	GetCampaignBySlug(slug string) (Campaign, error)
+	GetCampaignBySlug(input GetCampaignSlugInput) (Campaign, error)
+	UpdateCampaign(slugData GetCampaignSlugInput, userId int, campaignData CreateCampaignInput) (Campaign, error)
 }
 
 type service struct {
@@ -45,8 +54,7 @@ func (s *service) CreateCampaign(userId int, input CreateCampaignInput) (Campaig
 	campaign.GoalAmount = input.GoalAmount
 	campaign.CurrentAmount = 0
 	campaign.Perks = input.Perks
-	campaign.Slug = "slug"
-
+	campaign.Slug = slug.Make(fmt.Sprintf("%s %d", input.Name, time.Now().Unix()))
 	newCampaign, err := s.repository.Save(campaign)
 
 	if err != nil {
@@ -56,12 +64,38 @@ func (s *service) CreateCampaign(userId int, input CreateCampaignInput) (Campaig
 	return newCampaign, nil
 }
 
-func (s *service) GetCampaignBySlug(slug string) (Campaign, error) {
-	campaign, err := s.repository.FindBySlug(slug)
+func (s *service) GetCampaignBySlug(input GetCampaignSlugInput) (Campaign, error) {
+	campaign, err := s.repository.FindBySlug(input.Slug)
 
 	if err != nil {
 		return campaign, err
 	}
 
 	return campaign, nil
+}
+
+func (s *service) UpdateCampaign(slugData GetCampaignSlugInput, userId int, campaignData CreateCampaignInput) (Campaign, error) {
+	campaign, err := s.repository.FindBySlug(slugData.Slug)
+
+	if err != nil {
+		return campaign, err
+	}
+	// check if the current loggedin user is the campaign owner
+	if campaign.User.Id != userId {
+		return campaign, errors.New("Invalid campaign owner!")
+	}
+
+	campaign.Name = campaignData.Name
+	campaign.ShortDescription = campaignData.ShortDescription
+	campaign.Description = campaignData.Description
+	campaign.Perks = campaignData.Perks
+	campaign.GoalAmount = campaignData.GoalAmount
+
+	updatedCampaign, err := s.repository.Update(campaign)
+
+	if err != nil {
+		return updatedCampaign, err
+	}
+
+	return updatedCampaign, nil
 }
