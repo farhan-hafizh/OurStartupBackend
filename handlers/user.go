@@ -153,9 +153,8 @@ func (h *userHandler) UploadAvatar(c *gin.Context) {
 	}
 	// get user from context data
 	user := c.MustGet("loggedInUser").(user.User)
-	userId := user.Id
 	// create file path and filename
-	path := fmt.Sprintf("images/avatar-%d-%s", time.Now().Unix(), file.Filename)
+	path := fmt.Sprintf("images/avatar-%s-%d-%s", user.Username, time.Now().Unix(), file.Filename)
 
 	// save uploaded file to filepath with filename
 	err = c.SaveUploadedFile(file, path)
@@ -171,7 +170,7 @@ func (h *userHandler) UploadAvatar(c *gin.Context) {
 	}
 
 	// update user avatar path with id = userId in database with the path
-	_, err = h.userService.SaveAvatar(userId, path)
+	_, err = h.userService.SaveAvatar(user.Id, path)
 
 	if err != nil {
 		helper.SendErrorResponse(

@@ -12,7 +12,7 @@ type Service interface {
 	CreateCampaign(userId int, input CreateCampaignInput) (Campaign, error)
 	GetCampaigns(userId int) ([]Campaign, error)
 	GetCampaignBySlug(input GetCampaignSlugInput) (Campaign, error)
-	UpdateCampaign(slugData GetCampaignSlugInput, userId int, campaignData CreateCampaignInput) (Campaign, error)
+	UpdateCampaign(input GetCampaignSlugInput, campaignData CreateCampaignInput) (Campaign, error)
 	SaveCampaignImage(input CreateCampaignImageInput, fileLocation string) (CampaignImage, error)
 }
 
@@ -75,14 +75,14 @@ func (s *service) GetCampaignBySlug(input GetCampaignSlugInput) (Campaign, error
 	return campaign, nil
 }
 
-func (s *service) UpdateCampaign(slugData GetCampaignSlugInput, userId int, campaignData CreateCampaignInput) (Campaign, error) {
-	campaign, err := s.repository.FindBySlug(slugData.Slug)
+func (s *service) UpdateCampaign(input GetCampaignSlugInput, campaignData CreateCampaignInput) (Campaign, error) {
+	campaign, err := s.repository.FindBySlug(input.Slug)
 
 	if err != nil {
 		return campaign, err
 	}
 	// check if the current loggedin user is the campaign owner
-	if campaign.User.Id != userId {
+	if campaign.User.Id != input.User.Id {
 		return campaign, errors.New("Invalid campaign owner!")
 	}
 
@@ -104,6 +104,14 @@ func (s *service) UpdateCampaign(slugData GetCampaignSlugInput, userId int, camp
 func (s *service) SaveCampaignImage(input CreateCampaignImageInput, fileLocation string) (CampaignImage, error) {
 
 	campaign, err := s.repository.FindBySlug(input.Slug)
+
+	if err != nil {
+		return CampaignImage{}, err
+	}
+
+	if campaign.User.Id != input.User.Id {
+		return CampaignImage{}, errors.New("Invalid campaign owner!")
+	}
 
 	if input.IsPrimary {
 		_, err := s.repository.ChangeImageIsPrimary(campaign.Id)

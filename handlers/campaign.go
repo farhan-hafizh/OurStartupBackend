@@ -147,8 +147,9 @@ func (h *campaignHandler) UpdateCampaign(c *gin.Context) {
 	}
 
 	userData := c.MustGet("loggedInUser").(user.User)
+	slugData.User = userData
 
-	updatedCampaign, err := h.service.UpdateCampaign(slugData, userData.Id, inputCampaign)
+	updatedCampaign, err := h.service.UpdateCampaign(slugData, inputCampaign)
 
 	if err != nil {
 		helper.SendErrorResponse(
@@ -186,6 +187,9 @@ func (h *campaignHandler) UploadCampaignImage(c *gin.Context) {
 		return
 	}
 
+	userData := c.MustGet("loggedInUser").(user.User)
+	input.User = userData
+
 	file, err := c.FormFile("file")
 
 	if err != nil {
@@ -199,7 +203,7 @@ func (h *campaignHandler) UploadCampaignImage(c *gin.Context) {
 	}
 
 	// create file path and filename
-	path := fmt.Sprintf("images/campaign-%d-%s", time.Now().Unix(), file.Filename)
+	path := fmt.Sprintf("images/campaign-%s-%d-%s", input.User.Username, time.Now().Unix(), file.Filename)
 
 	// save uploaded file to filepath with filename
 	err = c.SaveUploadedFile(file, path)
@@ -213,6 +217,7 @@ func (h *campaignHandler) UploadCampaignImage(c *gin.Context) {
 			err, response)
 		return
 	}
+
 	_, err = h.service.SaveCampaignImage(input, path)
 
 	if err != nil {
