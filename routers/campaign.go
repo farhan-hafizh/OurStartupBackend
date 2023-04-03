@@ -9,10 +9,6 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-type CampaignRouters interface {
-	InitRoutes()
-}
-
 type campaignRouters struct {
 	router *router
 	group  *gin.RouterGroup
@@ -22,23 +18,14 @@ func CreateCampaignRouter(router *router, group *gin.RouterGroup) *campaignRoute
 	return &campaignRouters{router, group}
 }
 
-func (ur *campaignRouters) InitRouter() {
-	repository := campaign.CreateRepository(ur.router.db)
-	service := campaign.CreateService(repository)
-
-	userRepository := user.CreateRepository(ur.router.db)
-	userService := user.CreateService(userRepository)
-
-	authService := authMiddleware.CreateService(ur.router.config.JWTSecret, ur.router.config.EncryptionSecret)
-	authMiddleware := authMiddleware.CreateAuthMiddleware(authService, userService)
-
+func (ur *campaignRouters) InitRouter(service campaign.Service, userService user.Service, middleware authMiddleware.Middlerware) {
 	handler := handlers.CreateCampaignHandler(service, userService)
 
 	campaign := ur.group.Group("campaign")
 
-	campaign.GET("/", authMiddleware.GetAuthMiddleware(), handler.GetCampaigns)
-	campaign.POST("/create", authMiddleware.GetAuthMiddleware(), handler.CreateCampaign)
-	campaign.POST("/upload-image", authMiddleware.GetAuthMiddleware(), handler.UploadCampaignImage)
-	campaign.PUT("/:slug", authMiddleware.GetAuthMiddleware(), handler.UpdateCampaign)
-	campaign.GET("/:slug", authMiddleware.GetAuthMiddleware(), handler.GetCampaignDetail)
+	campaign.GET("/", middleware.GetAuthMiddleware(), handler.GetCampaigns)
+	campaign.POST("/create", middleware.GetAuthMiddleware(), handler.CreateCampaign)
+	campaign.POST("/upload-image", middleware.GetAuthMiddleware(), handler.UploadCampaignImage)
+	campaign.PUT("/:slug", middleware.GetAuthMiddleware(), handler.UpdateCampaign)
+	campaign.GET("/:slug", middleware.GetAuthMiddleware(), handler.GetCampaignDetail)
 }

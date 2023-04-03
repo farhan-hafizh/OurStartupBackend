@@ -4,14 +4,14 @@ import (
 	"fmt"
 	"net/http"
 	"ourstartup/config"
+	"ourstartup/middlewares/authMiddleware"
+	"ourstartup/services/campaign"
+	"ourstartup/services/transaction"
+	"ourstartup/services/user"
 
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 )
-
-type Routers interface {
-	RunRouter()
-}
 
 type router struct {
 	config config.Config
@@ -32,13 +32,31 @@ func (r *router) RunRouter() {
 
 	apiV1 := router.Group("/api/v1")
 
+	// dependencies
+	userRepository := user.CreateRepository(r.db)
+	userService := user.CreateService(userRepository)
+
+	campaignRepository := campaign.CreateRepository(r.db)
+	campaignService := campaign.CreateService(campaignRepository)
+
+	transactionRepo := transaction.CreateRepository(r.db)
+	transactionService := transaction.CreateService(transactionRepo)
+
+	authService := authMiddleware.CreateService(r.config.JWTSecret, r.config.EncryptionSecret)
+	authMiddleware := authMiddleware.CreateAuthMiddleware(authService, userService)
+
+	// init services routers
 	// user routes
 	userRouters := CreateUserRouter(r, apiV1)
-	userRouters.InitRouter()
+	userRouters.InitRouter(userService, authService, authMiddleware)
 
 	// campaign routes
 	campaignRouters := CreateCampaignRouter(r, apiV1)
-	campaignRouters.InitRouter()
+	campaignRouters.InitRouter(campaignService, userService, authMiddleware)
+
+	// transaction routes
+	transactionRouters := CreateTransactionRouters(r, apiV1)
+	transactionRouters.InitRouter(transactionService, userService, authMiddleware)
 
 	err := router.Run(fmt.Sprintf(":%s", r.config.Port))
 	if err != nil {

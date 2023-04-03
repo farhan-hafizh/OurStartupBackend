@@ -12,7 +12,7 @@ import (
 	"github.com/golang-jwt/jwt"
 )
 
-type AuthMiddlerware interface {
+type Middlerware interface {
 	GetAuthMiddleware() gin.HandlerFunc
 }
 
