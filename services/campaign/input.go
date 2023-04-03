@@ -11,3 +11,8 @@ type CreateCampaignInput struct {
 type GetCampaignSlugInput struct {
 	Slug string `uri:"slug" binding:"required`
 }
+
+type CreateCampaignImageInput struct {
+	Slug      string `form:"slug" binding:"required"`
+	IsPrimary bool   `form:"is_primary" binding:"required"`
+}

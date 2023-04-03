@@ -35,6 +35,7 @@ type CampaignImagesResponse struct {
 }
 
 func FormatDetailCampaignResponse(campaign Campaign) CampaignDetailResponse {
+
 	var perksArray []string
 	// split perks by koma
 	perks := strings.Split(campaign.Perks, ",")

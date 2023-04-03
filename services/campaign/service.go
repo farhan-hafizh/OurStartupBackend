@@ -13,6 +13,7 @@ type Service interface {
 	GetCampaigns(userId int) ([]Campaign, error)
 	GetCampaignBySlug(input GetCampaignSlugInput) (Campaign, error)
 	UpdateCampaign(slugData GetCampaignSlugInput, userId int, campaignData CreateCampaignInput) (Campaign, error)
+	SaveCampaignImage(input CreateCampaignImageInput, fileLocation string) (CampaignImage, error)
 }
 
 type service struct {
@@ -98,4 +99,31 @@ func (s *service) UpdateCampaign(slugData GetCampaignSlugInput, userId int, camp
 	}
 
 	return updatedCampaign, nil
+}
+
+func (s *service) SaveCampaignImage(input CreateCampaignImageInput, fileLocation string) (CampaignImage, error) {
+
+	campaign, err := s.repository.FindBySlug(input.Slug)
+
+	if input.IsPrimary {
+		_, err := s.repository.ChangeImageIsPrimary(campaign.Id)
+
+		if err != nil {
+			return CampaignImage{}, err
+		}
+	}
+
+	image := CampaignImage{
+		CampaignId: campaign.Id,
+		FileName:   fileLocation,
+		IsPrimary:  input.IsPrimary,
+	}
+
+	updatedImage, err := s.repository.SaveImage(image)
+
+	if err != nil {
+		return updatedImage, err
+	}
+
+	return updatedImage, nil
 }

@@ -17,7 +17,7 @@ type Response struct {
 	Data interface{} `json:"data"`
 }
 
-//create response
+// create response
 func CreateResponse(message string, code int, status string, data interface{}) Response {
 	meta := Meta{
 		Message: message,

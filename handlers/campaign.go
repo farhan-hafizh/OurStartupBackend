@@ -1,10 +1,12 @@
 package handlers
 
 import (
+	"fmt"
 	"net/http"
 	"ourstartup/helper"
 	"ourstartup/services/campaign"
 	"ourstartup/services/user"
+	"time"
 
 	"github.com/gin-gonic/gin"
 )
@@ -107,7 +109,10 @@ func (h *campaignHandler) GetCampaignDetail(c *gin.Context) {
 			"failed", err, nil)
 		return
 	}
-	formattedCampaign := campaign.FormatDetailCampaignResponse(campaignData)
+	var formattedCampaign interface{}
+	if campaignData.Id != 0 {
+		formattedCampaign = campaign.FormatDetailCampaignResponse(campaignData)
+	}
 
 	helper.SendResponse(c, "Successfully get campaign detail!", http.StatusOK, "success", formattedCampaign)
 }
@@ -161,5 +166,65 @@ func (h *campaignHandler) UpdateCampaign(c *gin.Context) {
 	formattedCampaign := campaign.FormatCampaignResponse(updatedCampaign)
 
 	helper.SendResponse(c, "Campaign successfully updated!", http.StatusOK, "success", formattedCampaign)
+
+}
+
+func (h *campaignHandler) UploadCampaignImage(c *gin.Context) {
+	var input campaign.CreateCampaignImageInput
+
+	err := c.ShouldBind(&input)
+
+	response := gin.H{"is_uploaded": false}
+
+	if err != nil {
+		helper.SendErrorResponse(
+			c,
+			"Upload campaign image failed!",
+			http.StatusUnprocessableEntity,
+			"failed",
+			err, response)
+		return
+	}
+
+	file, err := c.FormFile("file")
+
+	if err != nil {
+		helper.SendErrorResponse(
+			c,
+			"Upload campaign image failed!",
+			http.StatusBadRequest,
+			"failed",
+			err, response)
+		return
+	}
+
+	// create file path and filename
+	path := fmt.Sprintf("images/campaign-%d-%s", time.Now().Unix(), file.Filename)
+
+	// save uploaded file to filepath with filename
+	err = c.SaveUploadedFile(file, path)
+
+	if err != nil {
+		helper.SendErrorResponse(
+			c,
+			"Upload campaign image failed!",
+			http.StatusInternalServerError,
+			"failed",
+			err, response)
+		return
+	}
+	_, err = h.service.SaveCampaignImage(input, path)
+
+	if err != nil {
+		helper.SendErrorResponse(
+			c,
+			"Update campaign failed!",
+			http.StatusInternalServerError,
+			"failed", err, response)
+		return
+	}
+	response = gin.H{"is_uploaded": true}
+
+	helper.SendResponse(c, "Campaign image successfully uploaded!", http.StatusOK, "success", response)
 
 }
