@@ -17,6 +17,6 @@ type GetCampaignSlugInput struct {
 
 type CreateCampaignImageInput struct {
 	Slug      string `form:"slug" binding:"required"`
-	IsPrimary bool   `form:"is_primary" binding:"required"`
+	IsPrimary bool   `form:"is_primary"` // not required because by default is false
 	User      user.User
 }
