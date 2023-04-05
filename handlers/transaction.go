@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"net/http"
+	"ourstartup/entities"
 	"ourstartup/helper"
 	"ourstartup/services/campaign"
 	"ourstartup/services/transaction"
@@ -35,7 +36,7 @@ func (h *transactionHandler) CreateTransaction(c *gin.Context) {
 			err)
 		return
 	}
-	userData := c.MustGet("loggedInUser").(user.User)
+	userData := c.MustGet("loggedInUser").(entities.User)
 	input.User = userData
 
 	campaignSlug := campaign.GetCampaignSlugInput{
@@ -101,7 +102,7 @@ func (h *transactionHandler) GetTransHistoryByCampaign(c *gin.Context) {
 		return
 	}
 
-	userData := c.MustGet("loggedInUser").(user.User)
+	userData := c.MustGet("loggedInUser").(entities.User)
 
 	isAll := false
 	// if uri campaign owner not null
@@ -142,7 +143,7 @@ func (h *transactionHandler) GetTransHistoryByCampaign(c *gin.Context) {
 }
 
 func (h *transactionHandler) GetTransactionHistory(c *gin.Context) {
-	userData := c.MustGet("loggedInUser").(user.User)
+	userData := c.MustGet("loggedInUser").(entities.User)
 
 	input := transaction.GetTransactionHistory{
 		User: userData,

@@ -1,12 +1,16 @@
 package transaction
 
-import "gorm.io/gorm"
+import (
+	"ourstartup/entities"
+
+	"gorm.io/gorm"
+)
 
 type Repository interface {
-	GetAllByCampaignId(campaignId int) ([]Transaction, error)
-	GetAllNotSecretByCampaignId(campaignId int) ([]Transaction, error)
-	Save(trans Transaction) (Transaction, error)
-	GetByUserId(userId int) ([]Transaction, error)
+	GetAllByCampaignId(campaignId int) ([]entities.Transaction, error)
+	GetAllNotSecretByCampaignId(campaignId int) ([]entities.Transaction, error)
+	Save(trans entities.Transaction) (entities.Transaction, error)
+	GetByUserId(userId int) ([]entities.Transaction, error)
 }
 
 type repository struct {
@@ -18,9 +22,9 @@ func CreateRepository(db *gorm.DB) *repository {
 }
 
 // for admin or campaign owner
-func (r *repository) GetAllByCampaignId(campaignId int) ([]Transaction, error) {
+func (r *repository) GetAllByCampaignId(campaignId int) ([]entities.Transaction, error) {
 
-	var transactions []Transaction
+	var transactions []entities.Transaction
 	err := r.db.Where("campaign_id = ?", campaignId).Preload("User").Order("id desc").Find(&transactions).Error
 
 	if err != nil {
@@ -30,9 +34,9 @@ func (r *repository) GetAllByCampaignId(campaignId int) ([]Transaction, error) {
 	return transactions, nil
 }
 
-func (r *repository) GetAllNotSecretByCampaignId(campaignId int) ([]Transaction, error) {
+func (r *repository) GetAllNotSecretByCampaignId(campaignId int) ([]entities.Transaction, error) {
 
-	var transactions []Transaction
+	var transactions []entities.Transaction
 	err := r.db.Where("campaign_id = ? AND is_secret = ?", campaignId, false).Preload("User").Order("id desc").Find(&transactions).Error
 
 	if err != nil {
@@ -42,7 +46,7 @@ func (r *repository) GetAllNotSecretByCampaignId(campaignId int) ([]Transaction,
 	return transactions, nil
 }
 
-func (r *repository) Save(trans Transaction) (Transaction, error) {
+func (r *repository) Save(trans entities.Transaction) (entities.Transaction, error) {
 
 	err := r.db.Create(&trans).Error
 
@@ -54,8 +58,8 @@ func (r *repository) Save(trans Transaction) (Transaction, error) {
 }
 
 // get all logged in user transaction
-func (r *repository) GetByUserId(userId int) ([]Transaction, error) {
-	var transactions []Transaction
+func (r *repository) GetByUserId(userId int) ([]entities.Transaction, error) {
+	var transactions []entities.Transaction
 	// join campaign images by table campaign
 	err := r.db.Where("user_id = ?", userId).Preload("Campaign.CampaignImages", "campaign_images.is_primary = 1").Order("id desc").Find(&transactions).Error
 

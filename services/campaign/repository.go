@@ -1,14 +1,18 @@
 package campaign
 
-import "gorm.io/gorm"
+import (
+	"ourstartup/entities"
+
+	"gorm.io/gorm"
+)
 
 type Repository interface {
-	Save(campaign Campaign) (Campaign, error)
-	FindBySlug(slug string) (Campaign, error)
-	FindAll() ([]Campaign, error)
-	FindByCreatorId(id int) ([]Campaign, error)
-	Update(campaign Campaign) (Campaign, error)
-	SaveImage(image CampaignImage) (CampaignImage, error)
+	Save(campaign entities.Campaign) (entities.Campaign, error)
+	FindBySlug(slug string) (entities.Campaign, error)
+	FindAll() ([]entities.Campaign, error)
+	FindByCreatorId(id int) ([]entities.Campaign, error)
+	Update(campaign entities.Campaign) (entities.Campaign, error)
+	SaveImage(image entities.CampaignImage) (entities.CampaignImage, error)
 	ChangeImageIsPrimary(campaignId int) (bool, error)
 }
 
@@ -21,8 +25,8 @@ func CreateRepository(db *gorm.DB) *repository {
 }
 
 // find campaign by id
-func (r *repository) FindBySlug(slug string) (Campaign, error) {
-	var campaign Campaign
+func (r *repository) FindBySlug(slug string) (entities.Campaign, error) {
+	var campaign entities.Campaign
 
 	err := r.db.Where("slug = ?", slug).Preload("User").Preload("CampaignImages").Find(&campaign).Error
 
@@ -34,7 +38,7 @@ func (r *repository) FindBySlug(slug string) (Campaign, error) {
 }
 
 // create campaign
-func (r *repository) Save(campaign Campaign) (Campaign, error) {
+func (r *repository) Save(campaign entities.Campaign) (entities.Campaign, error) {
 	err := r.db.Create(&campaign).Error
 
 	if err != nil {
@@ -45,8 +49,8 @@ func (r *repository) Save(campaign Campaign) (Campaign, error) {
 }
 
 // find all campaign
-func (r *repository) FindAll() ([]Campaign, error) {
-	var campaigns []Campaign
+func (r *repository) FindAll() ([]entities.Campaign, error) {
+	var campaigns []entities.Campaign
 
 	err := r.db.Preload("User").Preload("CampaignImages", "campaign_images.is_primary = 1").Find(&campaigns).Error
 
@@ -57,8 +61,8 @@ func (r *repository) FindAll() ([]Campaign, error) {
 	return campaigns, nil
 }
 
-func (r *repository) FindByCreatorId(id int) ([]Campaign, error) {
-	var campaigns []Campaign
+func (r *repository) FindByCreatorId(id int) ([]entities.Campaign, error) {
+	var campaigns []entities.Campaign
 	// pre load get campaign images befor getting the campaign with is primary = true and save it to CampaignImages
 	err := r.db.Where("creator_id = ?", id).Preload("User").Preload("CampaignImages", "campaign_images.is_primary = 1").Find(&campaigns).Error
 
@@ -69,7 +73,7 @@ func (r *repository) FindByCreatorId(id int) ([]Campaign, error) {
 	return campaigns, nil
 }
 
-func (r *repository) Update(campaign Campaign) (Campaign, error) {
+func (r *repository) Update(campaign entities.Campaign) (entities.Campaign, error) {
 
 	err := r.db.Save(&campaign).Error
 
@@ -79,7 +83,7 @@ func (r *repository) Update(campaign Campaign) (Campaign, error) {
 	return campaign, nil
 }
 
-func (r *repository) SaveImage(image CampaignImage) (CampaignImage, error) {
+func (r *repository) SaveImage(image entities.CampaignImage) (entities.CampaignImage, error) {
 	err := r.db.Create(&image).Error
 
 	if err != nil {
@@ -90,7 +94,7 @@ func (r *repository) SaveImage(image CampaignImage) (CampaignImage, error) {
 
 func (r *repository) ChangeImageIsPrimary(campaignId int) (bool, error) {
 	// UPDATE campaign_images SET is_primary = 0 WHERE id = campaignId AND is_primary=1
-	err := r.db.Model(&CampaignImage{}).Where("campaign_id = ? AND is_primary = ?", campaignId, true).Update("is_primary", false).Error
+	err := r.db.Model(&entities.CampaignImage{}).Where("campaign_id = ? AND is_primary = ?", campaignId, true).Update("is_primary", false).Error
 
 	if err != nil {
 		return false, err

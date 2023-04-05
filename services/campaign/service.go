@@ -3,17 +3,18 @@ package campaign
 import (
 	"errors"
 	"fmt"
+	"ourstartup/entities"
 	"time"
 
 	"github.com/gosimple/slug"
 )
 
 type Service interface {
-	CreateCampaign(input CreateCampaignInput) (Campaign, error)
-	GetCampaigns(userId int) ([]Campaign, error)
-	GetCampaignBySlug(input GetCampaignSlugInput) (Campaign, error)
-	UpdateCampaign(input GetCampaignSlugInput, campaignData CreateCampaignInput) (Campaign, error)
-	SaveCampaignImage(input CreateCampaignImageInput, fileLocation string) (CampaignImage, error)
+	CreateCampaign(input CreateCampaignInput) (entities.Campaign, error)
+	GetCampaigns(userId int) ([]entities.Campaign, error)
+	GetCampaignBySlug(input GetCampaignSlugInput) (entities.Campaign, error)
+	UpdateCampaign(input GetCampaignSlugInput, campaignData CreateCampaignInput) (entities.Campaign, error)
+	SaveCampaignImage(input CreateCampaignImageInput, fileLocation string) (entities.CampaignImage, error)
 }
 
 type service struct {
@@ -24,7 +25,7 @@ func CreateService(repository Repository) *service {
 	return &service{repository}
 }
 
-func (s *service) GetCampaigns(userId int) ([]Campaign, error) {
+func (s *service) GetCampaigns(userId int) ([]entities.Campaign, error) {
 	if userId != 0 {
 		campaign, err := s.repository.FindByCreatorId(userId)
 
@@ -44,8 +45,8 @@ func (s *service) GetCampaigns(userId int) ([]Campaign, error) {
 	return campaigns, nil
 }
 
-func (s *service) CreateCampaign(input CreateCampaignInput) (Campaign, error) {
-	campaign := Campaign{
+func (s *service) CreateCampaign(input CreateCampaignInput) (entities.Campaign, error) {
+	campaign := entities.Campaign{
 		CreatorId:        input.User.Id,
 		Name:             input.Name,
 		ShortDescription: input.ShortDescription,
@@ -67,7 +68,7 @@ func (s *service) CreateCampaign(input CreateCampaignInput) (Campaign, error) {
 	return newCampaign, nil
 }
 
-func (s *service) GetCampaignBySlug(input GetCampaignSlugInput) (Campaign, error) {
+func (s *service) GetCampaignBySlug(input GetCampaignSlugInput) (entities.Campaign, error) {
 	campaign, err := s.repository.FindBySlug(input.Slug)
 
 	if err != nil {
@@ -77,7 +78,7 @@ func (s *service) GetCampaignBySlug(input GetCampaignSlugInput) (Campaign, error
 	return campaign, nil
 }
 
-func (s *service) UpdateCampaign(input GetCampaignSlugInput, campaignData CreateCampaignInput) (Campaign, error) {
+func (s *service) UpdateCampaign(input GetCampaignSlugInput, campaignData CreateCampaignInput) (entities.Campaign, error) {
 	campaign, err := s.repository.FindBySlug(input.Slug)
 
 	if err != nil {
@@ -103,27 +104,27 @@ func (s *service) UpdateCampaign(input GetCampaignSlugInput, campaignData Create
 	return updatedCampaign, nil
 }
 
-func (s *service) SaveCampaignImage(input CreateCampaignImageInput, fileLocation string) (CampaignImage, error) {
+func (s *service) SaveCampaignImage(input CreateCampaignImageInput, fileLocation string) (entities.CampaignImage, error) {
 
 	campaign, err := s.repository.FindBySlug(input.Slug)
 
 	if err != nil {
-		return CampaignImage{}, err
+		return entities.CampaignImage{}, err
 	}
 
 	if campaign.User.Id != input.User.Id {
-		return CampaignImage{}, errors.New("Invalid campaign owner!")
+		return entities.CampaignImage{}, errors.New("Invalid campaign owner!")
 	}
 
 	if input.IsPrimary {
 		_, err := s.repository.ChangeImageIsPrimary(campaign.Id)
 
 		if err != nil {
-			return CampaignImage{}, err
+			return entities.CampaignImage{}, err
 		}
 	}
 
-	image := CampaignImage{
+	image := entities.CampaignImage{
 		CampaignId: campaign.Id,
 		FileName:   fileLocation,
 		IsPrimary:  input.IsPrimary,

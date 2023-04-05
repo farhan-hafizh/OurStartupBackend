@@ -1,8 +1,7 @@
 package transaction
 
 import (
-	"ourstartup/services/campaign"
-	"ourstartup/services/user"
+	"ourstartup/entities"
 )
 
 type CreateTransactionInput struct {
@@ -10,16 +9,16 @@ type CreateTransactionInput struct {
 	Amount       int    `json:"amount" binding:"required"`
 	IsSecret     bool   `json:"is_secret" binding:"required"`
 	CallerId     string `json:"caller_id"`
-	Campaign     campaign.Campaign
-	User         user.User
+	Campaign     entities.Campaign
+	User         entities.User
 }
 
 type GetTransByCampaignId struct {
-	Campaign   campaign.Campaign
-	User       user.User
+	Campaign   entities.Campaign
+	User       entities.User
 	IsAllTrans bool
 }
 
 type GetTransactionHistory struct {
-	User user.User
+	User entities.User
 }

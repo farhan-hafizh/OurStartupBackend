@@ -1,1 +1,4 @@
 images/*
+
+config/development.env
+config/production.env

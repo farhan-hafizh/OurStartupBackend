@@ -1,8 +1,6 @@
-package transaction
+package entities
 
 import (
-	"ourstartup/services/campaign"
-	"ourstartup/services/user"
 	"time"
 )
 
@@ -16,6 +14,6 @@ type Transaction struct {
 	Status     string    `json:"status"`
 	CreatedAt  time.Time `json:"createdAt"`
 	UpdatedAt  time.Time `json:"updatedAt"`
-	User       user.User
-	Campaign   campaign.Campaign
+	User       User
+	Campaign   Campaign
 }

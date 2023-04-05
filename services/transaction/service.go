@@ -3,13 +3,14 @@ package transaction
 import (
 	"errors"
 	"fmt"
+	"ourstartup/entities"
 	"time"
 )
 
 type Service interface {
-	GetTransByCampaignId(input GetTransByCampaignId) ([]Transaction, error)
-	CreateTransaction(input CreateTransactionInput) (Transaction, error)
-	GetTransactionHistory(input GetTransactionHistory) ([]Transaction, error)
+	GetTransByCampaignId(input GetTransByCampaignId) ([]entities.Transaction, error)
+	CreateTransaction(input CreateTransactionInput) (entities.Transaction, error)
+	GetTransactionHistory(input GetTransactionHistory) ([]entities.Transaction, error)
 }
 
 type service struct {
@@ -20,8 +21,8 @@ func CreateService(repository Repository) *service {
 	return &service{repository}
 }
 
-func (s *service) GetTransByCampaignId(input GetTransByCampaignId) ([]Transaction, error) {
-	var transactions []Transaction
+func (s *service) GetTransByCampaignId(input GetTransByCampaignId) ([]entities.Transaction, error) {
+	var transactions []entities.Transaction
 	var err error
 
 	fmt.Println(input.IsAllTrans)
@@ -44,16 +45,16 @@ func (s *service) GetTransByCampaignId(input GetTransByCampaignId) ([]Transactio
 	return transactions, nil
 }
 
-func (s *service) CreateTransaction(input CreateTransactionInput) (Transaction, error) {
+func (s *service) CreateTransaction(input CreateTransactionInput) (entities.Transaction, error) {
 
-	trans := Transaction{
+	trans := entities.Transaction{
 		CampaignId: input.Campaign.Id,
 		UserId:     input.User.Id,
 		Amount:     input.Amount,
 		IsSecret:   input.IsSecret,
 		Status:     "pending",
 		User:       input.User,
-		Code:       fmt.Sprintf("Transaction-%d%d%d", input.User.Id, input.Campaign.Id, time.Now().Unix()),
+		Code:       fmt.Sprintf("entities.Transaction-%d%d%d", input.User.Id, input.Campaign.Id, time.Now().Unix()),
 	}
 
 	newTransaction, err := s.repository.Save(trans)
@@ -65,7 +66,7 @@ func (s *service) CreateTransaction(input CreateTransactionInput) (Transaction, 
 	return newTransaction, nil
 }
 
-func (s *service) GetTransactionHistory(input GetTransactionHistory) ([]Transaction, error) {
+func (s *service) GetTransactionHistory(input GetTransactionHistory) ([]entities.Transaction, error) {
 
 	transactions, err := s.repository.GetByUserId(input.User.Id)
 

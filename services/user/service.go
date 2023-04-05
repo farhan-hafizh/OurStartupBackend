@@ -3,18 +3,19 @@ package user
 import (
 	"errors"
 	"fmt"
+	"ourstartup/entities"
 
 	"golang.org/x/crypto/bcrypt"
 )
 
 // service used for interacting with handlers
 type Service interface {
-	RegisterUser(input RegisterUserInput) (User, error)
-	Login(input LoginUserInput) (User, error)
+	RegisterUser(input RegisterUserInput) (entities.User, error)
+	Login(input LoginUserInput) (entities.User, error)
 	IsEmailAvailable(input CheckEmailInput) (bool, error)
-	SaveAvatar(id int, fileLocation string) (User, error)
-	GetUserById(id int) (User, error)
-	GetUserByUsername(username string) (User, error)
+	SaveAvatar(id int, fileLocation string) (entities.User, error)
+	GetUserById(id int) (entities.User, error)
+	GetUserByUsername(username string) (entities.User, error)
 }
 
 type service struct {
@@ -26,9 +27,9 @@ func CreateService(repository Repository) *service {
 	return &service{repository}
 }
 
-func (s *service) RegisterUser(input RegisterUserInput) (User, error) {
+func (s *service) RegisterUser(input RegisterUserInput) (entities.User, error) {
 	// create object user
-	user := User{}
+	user := entities.User{}
 	user.Name = input.Name
 	user.Email = input.Email
 	user.Occupation = input.Occupation
@@ -54,7 +55,7 @@ func (s *service) RegisterUser(input RegisterUserInput) (User, error) {
 	return newUser, nil
 }
 
-func (s *service) Login(input LoginUserInput) (User, error) {
+func (s *service) Login(input LoginUserInput) (entities.User, error) {
 
 	query := input.Query
 	password := input.Password
@@ -66,7 +67,7 @@ func (s *service) Login(input LoginUserInput) (User, error) {
 	}
 
 	if user.Id == 0 {
-		return user, errors.New("User not found...")
+		return user, errors.New("entities.User not found...")
 	}
 
 	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password))
@@ -93,7 +94,7 @@ func (s *service) IsEmailAvailable(input CheckEmailInput) (bool, error) {
 	return true, nil
 }
 
-func (s *service) SaveAvatar(id int, fileLocation string) (User, error) {
+func (s *service) SaveAvatar(id int, fileLocation string) (entities.User, error) {
 	//find user by id
 	user, err := s.repository.FindById(id)
 
@@ -113,7 +114,7 @@ func (s *service) SaveAvatar(id int, fileLocation string) (User, error) {
 
 }
 
-func (s *service) GetUserById(id int) (User, error) {
+func (s *service) GetUserById(id int) (entities.User, error) {
 	user, err := s.repository.FindById(id)
 
 	if err != nil {
@@ -123,7 +124,7 @@ func (s *service) GetUserById(id int) (User, error) {
 	return user, nil
 }
 
-func (s *service) GetUserByUsername(username string) (User, error) {
+func (s *service) GetUserByUsername(username string) (entities.User, error) {
 	user, err := s.repository.FindByQuery(username)
 
 	if err != nil {

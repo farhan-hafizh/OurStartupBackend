@@ -3,6 +3,7 @@ package handlers
 import (
 	"fmt"
 	"net/http"
+	"ourstartup/entities"
 	"ourstartup/helper"
 	"ourstartup/middlewares/authMiddleware"
 	"ourstartup/services/user"
@@ -152,7 +153,7 @@ func (h *userHandler) UploadAvatar(c *gin.Context) {
 		return
 	}
 	// get user from context data
-	user := c.MustGet("loggedInUser").(user.User)
+	user := c.MustGet("loggedInUser").(entities.User)
 	// create file path and filename
 	path := fmt.Sprintf("images/avatar-%s-%d-%s", user.Username, time.Now().Unix(), file.Filename)
 

@@ -1,6 +1,7 @@
 package transaction
 
 import (
+	"ourstartup/entities"
 	"time"
 )
 
@@ -28,7 +29,7 @@ type TransactionCampaignResponse struct {
 	ImageUrl string `json:"image_url"`
 }
 
-func FormatBasicTransactionResponse(trans Transaction) BasicTransactionResponse {
+func FormatBasicTransactionResponse(trans entities.Transaction) BasicTransactionResponse {
 	return BasicTransactionResponse{
 		Id:        trans.Code,
 		Amount:    trans.Amount,
@@ -37,14 +38,14 @@ func FormatBasicTransactionResponse(trans Transaction) BasicTransactionResponse 
 	}
 }
 
-func FormatTransactionResponse(transaction Transaction) TransactionResponse {
+func FormatTransactionResponse(transaction entities.Transaction) TransactionResponse {
 	return TransactionResponse{
 		BasicTransactionResponse: FormatBasicTransactionResponse(transaction),
 		Name:                     transaction.User.Name,
 	}
 }
 
-func FormatTransactionsResponse(transactions []Transaction) []TransactionResponse {
+func FormatTransactionsResponse(transactions []entities.Transaction) []TransactionResponse {
 
 	if len(transactions) == 0 {
 		return []TransactionResponse{}
@@ -60,7 +61,7 @@ func FormatTransactionsResponse(transactions []Transaction) []TransactionRespons
 	return response
 }
 
-func FormatTranHistoryResponse(transaction Transaction) TransactionHistoryResponse {
+func FormatTranHistoryResponse(transaction entities.Transaction) TransactionHistoryResponse {
 
 	imageUrl := ""
 
@@ -79,7 +80,7 @@ func FormatTranHistoryResponse(transaction Transaction) TransactionHistoryRespon
 	}
 }
 
-func FormatTransHistoryResponse(transactions []Transaction) []TransactionHistoryResponse {
+func FormatTransHistoryResponse(transactions []entities.Transaction) []TransactionHistoryResponse {
 
 	if len(transactions) == 0 {
 		return []TransactionHistoryResponse{}

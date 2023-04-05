@@ -1,6 +1,7 @@
 package campaign
 
 import (
+	"ourstartup/entities"
 	"ourstartup/services/user"
 	"strings"
 )
@@ -34,7 +35,7 @@ type CampaignImagesResponse struct {
 	IsPrimary bool   `json:"is_primary"`
 }
 
-func FormatDetailCampaignResponse(campaign Campaign) CampaignDetailResponse {
+func FormatDetailCampaignResponse(campaign entities.Campaign) CampaignDetailResponse {
 
 	var perksArray []string
 	// split perks by koma
@@ -74,7 +75,7 @@ func FormatDetailCampaignResponse(campaign Campaign) CampaignDetailResponse {
 }
 
 // format campaign
-func FormatCampaignResponse(campaign Campaign) CampaignResponse {
+func FormatCampaignResponse(campaign entities.Campaign) CampaignResponse {
 
 	imageUrl := ""
 
@@ -95,7 +96,7 @@ func FormatCampaignResponse(campaign Campaign) CampaignResponse {
 }
 
 // format slice campaign
-func FormatCampaignsResponse(campaigns []Campaign) []CampaignResponse {
+func FormatCampaignsResponse(campaigns []entities.Campaign) []CampaignResponse {
 
 	if len(campaigns) == 0 {
 		return []CampaignResponse{}

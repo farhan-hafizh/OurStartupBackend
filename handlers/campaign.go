@@ -3,6 +3,7 @@ package handlers
 import (
 	"fmt"
 	"net/http"
+	"ourstartup/entities"
 	"ourstartup/helper"
 	"ourstartup/services/campaign"
 	"ourstartup/services/user"
@@ -62,7 +63,7 @@ func (h *campaignHandler) CreateCampaign(c *gin.Context) {
 			err)
 		return
 	}
-	userData := c.MustGet("loggedInUser").(user.User)
+	userData := c.MustGet("loggedInUser").(entities.User)
 	input.User = userData
 
 	newCampaign, err := h.service.CreateCampaign(input)
@@ -143,7 +144,7 @@ func (h *campaignHandler) UpdateCampaign(c *gin.Context) {
 		return
 	}
 
-	userData := c.MustGet("loggedInUser").(user.User)
+	userData := c.MustGet("loggedInUser").(entities.User)
 	slugData.User = userData
 
 	updatedCampaign, err := h.service.UpdateCampaign(slugData, inputCampaign)
@@ -184,7 +185,7 @@ func (h *campaignHandler) UploadCampaignImage(c *gin.Context) {
 		return
 	}
 
-	userData := c.MustGet("loggedInUser").(user.User)
+	userData := c.MustGet("loggedInUser").(entities.User)
 	input.User = userData
 
 	file, err := c.FormFile("file")

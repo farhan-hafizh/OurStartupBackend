@@ -1,5 +1,7 @@
 package user
 
+import "ourstartup/entities"
+
 type UserBasicResponse struct {
 	Name       string `json:"name"`
 	Occupation string `json:"occupation"`
@@ -21,28 +23,28 @@ type LoginResponse struct {
 	Token             string `json:"token"`
 }
 
-func FormatUserBasicResponse(user User) UserBasicResponse {
+func FormatUserBasicResponse(user entities.User) UserBasicResponse {
 	return UserBasicResponse{
 		Name:       user.Name,
 		Occupation: user.Occupation,
 		Username:   user.Username,
 	}
 }
-func FormatUserWithProfileResponse(user User) UserWithProfileResponse {
+func FormatUserWithProfileResponse(user entities.User) UserWithProfileResponse {
 	return UserWithProfileResponse{
 		UserBasicResponse: FormatUserBasicResponse(user),
 		AvatarFile:        user.AvatarFileName,
 	}
 }
 
-func FormatRegisterResponse(user User) RegisterResponse {
+func FormatRegisterResponse(user entities.User) RegisterResponse {
 	return RegisterResponse{
 		UserBasicResponse: FormatUserBasicResponse(user),
 		Email:             user.Email,
 	}
 }
 
-func FormatLoginResponse(user User, token string) LoginResponse {
+func FormatLoginResponse(user entities.User, token string) LoginResponse {
 	return LoginResponse{
 		UserBasicResponse: FormatUserBasicResponse(user),
 		Token:             token,
