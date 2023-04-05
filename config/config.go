@@ -10,6 +10,8 @@ type Config struct {
 	EncryptionSecret string `mapstructure:"ENCRYPTION_SECRET"`
 	JWTSecret        string `mapstructure:"JWT_SECRET"`
 	Port             string `mapstructure:"PORT"`
+	MidClient        string `mapstructure:"MIDTRANS_CLIENT_KEY"`
+	MidServer        string `mapstructure:"MIDTRANS_SERVER_KEY"`
 }
 
 func LoadConfig(mode string) (config Config, err error) {

@@ -6,20 +6,26 @@ import (
 )
 
 type BasicTransactionResponse struct {
-	Id        string    `json:"id"`
+	Id        string    `json:"id"` // code
 	Amount    int       `json:"amount"`
 	IsSecret  bool      `json:"is_secret"`
 	CreatedAt time.Time `json:"created_at"`
 }
 
-type TransactionResponse struct {
+type NewTransactionResponse struct {
+	BasicTransactionResponse
+	PaymentUrl string `json:"payment_url"`
+	Status     string `json:"status"`
+}
+
+type TransactionResponse struct { // general transaction access
 	BasicTransactionResponse
 	Name string `json:"name"`
 }
 
-type TransactionHistoryResponse struct {
-	BasicTransactionResponse //embed
-	Status                   string
+type TransactionHistoryResponse struct { // trans owner access
+	BasicTransactionResponse                             //embed
+	Status                   string                      `json:"status"`
 	Campaign                 TransactionCampaignResponse `json:"campaign"`
 }
 
@@ -61,6 +67,7 @@ func FormatTransactionsResponse(transactions []entities.Transaction) []Transacti
 	return response
 }
 
+// single trans
 func FormatTranHistoryResponse(transaction entities.Transaction) TransactionHistoryResponse {
 
 	imageUrl := ""
@@ -80,6 +87,7 @@ func FormatTranHistoryResponse(transaction entities.Transaction) TransactionHist
 	}
 }
 
+// plural
 func FormatTransHistoryResponse(transactions []entities.Transaction) []TransactionHistoryResponse {
 
 	if len(transactions) == 0 {
@@ -94,4 +102,12 @@ func FormatTransHistoryResponse(transactions []entities.Transaction) []Transacti
 	}
 
 	return response
+}
+
+func FormatNewTransactionResponse(transaction entities.Transaction) NewTransactionResponse {
+	return NewTransactionResponse{
+		BasicTransactionResponse: FormatBasicTransactionResponse(transaction),
+		PaymentUrl:               transaction.PaymentUrl,
+		Status:                   transaction.Status,
+	}
 }

@@ -11,6 +11,7 @@ type Repository interface {
 	GetAllNotSecretByCampaignId(campaignId int) ([]entities.Transaction, error)
 	Save(trans entities.Transaction) (entities.Transaction, error)
 	GetByUserId(userId int) ([]entities.Transaction, error)
+	Update(transaction entities.Transaction) (entities.Transaction, error)
 }
 
 type repository struct {
@@ -68,4 +69,14 @@ func (r *repository) GetByUserId(userId int) ([]entities.Transaction, error) {
 	}
 
 	return transactions, nil
+}
+
+func (r *repository) Update(transaction entities.Transaction) (entities.Transaction, error) {
+	err := r.db.Save(&transaction).Error
+
+	if err != nil {
+		return transaction, err
+	}
+
+	return transaction, nil
 }

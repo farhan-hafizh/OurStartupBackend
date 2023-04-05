@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 	"ourstartup/config"
+	"ourstartup/helper/payment"
 	"ourstartup/middlewares/authMiddleware"
 	"ourstartup/services/campaign"
 	"ourstartup/services/transaction"
@@ -33,6 +34,8 @@ func (r *router) RunRouter() {
 	apiV1 := router.Group("/api/v1")
 
 	// dependencies
+	paymentService := payment.CreateService(r.config)
+
 	userRepository := user.CreateRepository(r.db)
 	userService := user.CreateService(userRepository)
 
@@ -40,7 +43,7 @@ func (r *router) RunRouter() {
 	campaignService := campaign.CreateService(campaignRepository)
 
 	transactionRepo := transaction.CreateRepository(r.db)
-	transactionService := transaction.CreateService(transactionRepo)
+	transactionService := transaction.CreateService(transactionRepo, paymentService)
 
 	authService := authMiddleware.CreateService(r.config.JWTSecret, r.config.EncryptionSecret)
 	authMiddleware := authMiddleware.CreateAuthMiddleware(authService, userService)

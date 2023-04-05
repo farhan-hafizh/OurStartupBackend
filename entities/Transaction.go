@@ -12,6 +12,7 @@ type Transaction struct {
 	Amount     int       `json:"amount"`
 	IsSecret   bool      `json:"is_secret"`
 	Status     string    `json:"status"`
+	PaymentUrl string    `json:"payment_url"`
 	CreatedAt  time.Time `json:"createdAt"`
 	UpdatedAt  time.Time `json:"updatedAt"`
 	User       User

@@ -69,7 +69,7 @@ func (h *transactionHandler) CreateTransaction(c *gin.Context) {
 		return
 	}
 
-	formattedTrans := transaction.FormatTransactionResponse(trans)
+	formattedTrans := transaction.FormatNewTransactionResponse(trans)
 
 	helper.SendResponse(c, "Successfully create transaction!", http.StatusOK, "success", formattedTrans)
 }

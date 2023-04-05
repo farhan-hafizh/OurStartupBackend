@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"ourstartup/entities"
+	"ourstartup/helper/payment"
 	"time"
 )
 
@@ -14,18 +15,17 @@ type Service interface {
 }
 
 type service struct {
-	repository Repository
+	repository     Repository
+	paymentService payment.Service
 }
 
-func CreateService(repository Repository) *service {
-	return &service{repository}
+func CreateService(repository Repository, paymentService payment.Service) *service {
+	return &service{repository, paymentService}
 }
 
 func (s *service) GetTransByCampaignId(input GetTransByCampaignId) ([]entities.Transaction, error) {
 	var transactions []entities.Transaction
 	var err error
-
-	fmt.Println(input.IsAllTrans)
 
 	if input.IsAllTrans {
 		// if not the owner
@@ -54,10 +54,23 @@ func (s *service) CreateTransaction(input CreateTransactionInput) (entities.Tran
 		IsSecret:   input.IsSecret,
 		Status:     "pending",
 		User:       input.User,
-		Code:       fmt.Sprintf("entities.Transaction-%d%d%d", input.User.Id, input.Campaign.Id, time.Now().Unix()),
+		Code:       fmt.Sprintf("Transaction-%d%d%d", input.User.Id, input.Campaign.Id, time.Now().Unix()),
 	}
 
 	newTransaction, err := s.repository.Save(trans)
+
+	if err != nil {
+		return newTransaction, err
+	}
+	paymentUrl, err := s.paymentService.GetRedirectUrl(newTransaction)
+
+	newTransaction.PaymentUrl = paymentUrl
+
+	if err != nil {
+		return newTransaction, err
+	}
+
+	newTransaction, err = s.repository.Update(newTransaction)
 
 	if err != nil {
 		return newTransaction, err
