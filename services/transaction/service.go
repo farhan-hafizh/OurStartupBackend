@@ -51,9 +51,9 @@ func (s *service) CreateTransaction(input CreateTransactionInput) (Transaction, 
 		UserId:     input.User.Id,
 		Amount:     input.Amount,
 		IsSecret:   input.IsSecret,
-		Status:     "unpaid",
+		Status:     "pending",
 		User:       input.User,
-		CallerId:   fmt.Sprintf("transaction-%d%d%d", input.User.Id, input.Campaign.Id, time.Now().Unix()),
+		Code:       fmt.Sprintf("Transaction-%d%d%d", input.User.Id, input.Campaign.Id, time.Now().Unix()),
 	}
 
 	newTransaction, err := s.repository.Save(trans)

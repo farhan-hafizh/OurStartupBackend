@@ -30,7 +30,7 @@ type TransactionCampaignResponse struct {
 
 func FormatBasicTransactionResponse(trans Transaction) BasicTransactionResponse {
 	return BasicTransactionResponse{
-		Id:        trans.CallerId,
+		Id:        trans.Code,
 		Amount:    trans.Amount,
 		IsSecret:  trans.IsSecret,
 		CreatedAt: trans.CreatedAt,
