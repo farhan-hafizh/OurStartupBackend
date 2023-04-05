@@ -10,6 +10,7 @@ type Config struct {
 	EncryptionSecret string `mapstructure:"ENCRYPTION_SECRET"`
 	JWTSecret        string `mapstructure:"JWT_SECRET"`
 	Port             string `mapstructure:"PORT"`
+	ClientLink       string `mapstructure:"CLIENT_LINK"`
 	MidClient        string `mapstructure:"MIDTRANS_CLIENT_KEY"`
 	MidServer        string `mapstructure:"MIDTRANS_SERVER_KEY"`
 }

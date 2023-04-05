@@ -10,6 +10,7 @@ import (
 	"ourstartup/services/transaction"
 	"ourstartup/services/user"
 
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 )
@@ -27,6 +28,10 @@ func (r *router) RunRouter() {
 	router := gin.New()
 	router.Use(gin.Logger())
 	router.Use(gin.Recovery())
+
+	corsConfig := cors.DefaultConfig()
+	corsConfig.AllowOrigins = []string{r.config.ClientLink}
+	router.Use(cors.New(corsConfig))
 
 	// static routes
 	router.StaticFS("/images", http.Dir("images"))
