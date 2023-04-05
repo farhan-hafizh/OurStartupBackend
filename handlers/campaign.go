@@ -49,7 +49,7 @@ func (h *campaignHandler) GetCampaigns(c *gin.Context) {
 }
 
 func (h *campaignHandler) CreateCampaign(c *gin.Context) {
-	input := &campaign.CreateCampaignInput{}
+	input := campaign.CreateCampaignInput{}
 
 	err := c.ShouldBindJSON(&input)
 
@@ -63,9 +63,9 @@ func (h *campaignHandler) CreateCampaign(c *gin.Context) {
 		return
 	}
 	userData := c.MustGet("loggedInUser").(user.User)
-	userId := userData.Id
+	input.User = userData
 
-	newCampaign, err := h.service.CreateCampaign(userId, *input)
+	newCampaign, err := h.service.CreateCampaign(input)
 
 	if err != nil {
 		helper.SendErrorResponse(
@@ -75,9 +75,6 @@ func (h *campaignHandler) CreateCampaign(c *gin.Context) {
 			"failed", err, nil)
 		return
 	}
-	newCampaign.User.Name = userData.Name
-	newCampaign.User.Username = userData.Username
-	newCampaign.User.Occupation = userData.Occupation
 
 	formattedCampaign := campaign.FormatCampaignResponse(newCampaign)
 

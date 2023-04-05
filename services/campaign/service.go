@@ -9,7 +9,7 @@ import (
 )
 
 type Service interface {
-	CreateCampaign(userId int, input CreateCampaignInput) (Campaign, error)
+	CreateCampaign(input CreateCampaignInput) (Campaign, error)
 	GetCampaigns(userId int) ([]Campaign, error)
 	GetCampaignBySlug(input GetCampaignSlugInput) (Campaign, error)
 	UpdateCampaign(input GetCampaignSlugInput, campaignData CreateCampaignInput) (Campaign, error)
@@ -44,18 +44,20 @@ func (s *service) GetCampaigns(userId int) ([]Campaign, error) {
 	return campaigns, nil
 }
 
-func (s *service) CreateCampaign(userId int, input CreateCampaignInput) (Campaign, error) {
-	campaign := Campaign{}
+func (s *service) CreateCampaign(input CreateCampaignInput) (Campaign, error) {
+	campaign := Campaign{
+		CreatorId:        input.User.Id,
+		Name:             input.Name,
+		ShortDescription: input.ShortDescription,
+		Description:      input.Description,
+		BackerCount:      0,
+		GoalAmount:       input.GoalAmount,
+		CurrentAmount:    0,
+		Perks:            input.Perks,
+		User:             input.User,
+		Slug:             slug.Make(fmt.Sprintf("%s %d", input.Name, time.Now().Unix())),
+	}
 
-	campaign.CreatorId = userId
-	campaign.Name = input.Name
-	campaign.ShortDescription = input.ShortDescription
-	campaign.Description = input.Description
-	campaign.BackerCount = 0
-	campaign.GoalAmount = input.GoalAmount
-	campaign.CurrentAmount = 0
-	campaign.Perks = input.Perks
-	campaign.Slug = slug.Make(fmt.Sprintf("%s %d", input.Name, time.Now().Unix()))
 	newCampaign, err := s.repository.Save(campaign)
 
 	if err != nil {

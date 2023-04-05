@@ -56,7 +56,7 @@ func (r *router) RunRouter() {
 
 	// transaction routes
 	transactionRouters := CreateTransactionRouters(r, apiV1)
-	transactionRouters.InitRouter(transactionService, userService, authMiddleware)
+	transactionRouters.InitRouter(transactionService, userService, campaignService, authMiddleware)
 
 	err := router.Run(fmt.Sprintf(":%s", r.config.Port))
 	if err != nil {
