@@ -85,7 +85,9 @@ func (h *transactionHandler) CreateTransaction(c *gin.Context) {
 
 	trans.PaymentUrl = paymentUrl
 
-	formattedTrans := transaction.FormatNewTransactionResponse(trans)
+	updatedTrans, err := h.service.UpdateTransaction(trans)
+
+	formattedTrans := transaction.FormatNewTransactionResponse(updatedTrans)
 
 	helper.SendResponse(c, "Successfully create transaction!", http.StatusOK, "success", formattedTrans)
 }
