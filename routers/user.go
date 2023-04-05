@@ -23,6 +23,7 @@ func (ur *userRouters) InitRouter(service user.Service, authService authMiddlewa
 	user := ur.group.Group("users")
 	user.POST("/create", userHandler.RegisterUser)
 	user.POST("/login", userHandler.Login)
+	user.GET("/fetch", userHandler.FetchUser)
 	user.POST("/check-email", userHandler.CheckEmailAvailability)
 	user.POST("/upload-avatar", authMiddleware.GetAuthMiddleware(), userHandler.UploadAvatar)
 }

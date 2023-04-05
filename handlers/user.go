@@ -187,3 +187,10 @@ func (h *userHandler) UploadAvatar(c *gin.Context) {
 
 	helper.SendResponse(c, "Avatar successfully updated!", http.StatusOK, "success", response)
 }
+
+func (h *userHandler) FetchUser(c *gin.Context) {
+	loggedinUser := c.MustGet("loggedInUser").(entities.User)
+
+	formattedUser := user.FormatUserWithProfileResponse(loggedinUser)
+	helper.SendResponse(c, "Successfully fetch user!", http.StatusOK, "success", formattedUser)
+}
