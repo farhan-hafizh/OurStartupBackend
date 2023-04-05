@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"net/http"
 	"ourstartup/config"
-	"ourstartup/helper/payment"
 	"ourstartup/middlewares/authMiddleware"
 	"ourstartup/services/campaign"
+	"ourstartup/services/payment"
 	"ourstartup/services/transaction"
 	"ourstartup/services/user"
 
@@ -34,18 +34,16 @@ func (r *router) RunRouter() {
 	apiV1 := router.Group("/api/v1")
 
 	// dependencies
-	paymentService := payment.CreateService(r.config)
-
 	userRepository := user.CreateRepository(r.db)
-	userService := user.CreateService(userRepository)
-
 	campaignRepository := campaign.CreateRepository(r.db)
-	campaignService := campaign.CreateService(campaignRepository)
-
 	transactionRepo := transaction.CreateRepository(r.db)
-	transactionService := transaction.CreateService(transactionRepo, paymentService)
 
+	userService := user.CreateService(userRepository)
+	campaignService := campaign.CreateService(campaignRepository)
+	transactionService := transaction.CreateService(transactionRepo)
+	paymentService := payment.CreateService(r.config, transactionService, campaignService)
 	authService := authMiddleware.CreateService(r.config.JWTSecret, r.config.EncryptionSecret)
+
 	authMiddleware := authMiddleware.CreateAuthMiddleware(authService, userService)
 
 	// init services routers
@@ -59,7 +57,7 @@ func (r *router) RunRouter() {
 
 	// transaction routes
 	transactionRouters := CreateTransactionRouters(r, apiV1)
-	transactionRouters.InitRouter(transactionService, userService, campaignService, authMiddleware)
+	transactionRouters.InitRouter(transactionService, userService, campaignService, paymentService, authMiddleware)
 
 	err := router.Run(fmt.Sprintf(":%s", r.config.Port))
 	if err != nil {

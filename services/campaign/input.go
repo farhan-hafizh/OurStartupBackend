@@ -8,13 +8,17 @@ type CreateCampaignInput struct {
 	Description      string `json:"description" binding:"required"`
 	GoalAmount       int    `json:"goal_amount" binding:"required"`
 	Perks            string `json:"perks" binding:"required"`
+	BackerCount      int    `json:"backer_count"`
+	CurrentAmount    int    `json:"current_amount"`
 	User             entities.User
 }
 
-type GetCampaignSlugInput struct {
-	Slug          string `uri:"slug" binding:"required"`
-	CampaignOwner string `uri:"campaignOwner"` // for transaction
-	User          entities.User
+type GetCampaignInput struct {
+	Slug            string `uri:"slug"`
+	Id              int    `json:"id"`
+	CampaignOwner   string `uri:"campaignOwner"` // for transaction
+	IsPaymentSucces bool
+	User            entities.User
 }
 
 type CreateCampaignImageInput struct {

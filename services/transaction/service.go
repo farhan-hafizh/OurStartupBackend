@@ -4,7 +4,6 @@ import (
 	"errors"
 	"fmt"
 	"ourstartup/entities"
-	"ourstartup/helper/payment"
 	"time"
 )
 
@@ -12,15 +11,16 @@ type Service interface {
 	GetTransByCampaignId(input GetTransByCampaignId) ([]entities.Transaction, error)
 	CreateTransaction(input CreateTransactionInput) (entities.Transaction, error)
 	GetTransactionHistory(input GetTransactionHistory) ([]entities.Transaction, error)
+	GetTransByTransactionCode(input GetTransactionByCode) (entities.Transaction, error)
+	UpdateTransaction(transaction entities.Transaction) (entities.Transaction, error)
 }
 
 type service struct {
-	repository     Repository
-	paymentService payment.Service
+	repository Repository
 }
 
-func CreateService(repository Repository, paymentService payment.Service) *service {
-	return &service{repository, paymentService}
+func CreateService(repository Repository) *service {
+	return &service{repository}
 }
 
 func (s *service) GetTransByCampaignId(input GetTransByCampaignId) ([]entities.Transaction, error) {
@@ -62,21 +62,18 @@ func (s *service) CreateTransaction(input CreateTransactionInput) (entities.Tran
 	if err != nil {
 		return newTransaction, err
 	}
-	paymentUrl, err := s.paymentService.GetRedirectUrl(newTransaction)
-
-	newTransaction.PaymentUrl = paymentUrl
-
-	if err != nil {
-		return newTransaction, err
-	}
-
-	newTransaction, err = s.repository.Update(newTransaction)
-
-	if err != nil {
-		return newTransaction, err
-	}
 
 	return newTransaction, nil
+}
+
+func (s *service) UpdateTransaction(transaction entities.Transaction) (entities.Transaction, error) {
+	transaction, err := s.repository.Update(transaction)
+
+	if err != nil {
+		return transaction, err
+	}
+
+	return transaction, nil
 }
 
 func (s *service) GetTransactionHistory(input GetTransactionHistory) ([]entities.Transaction, error) {
@@ -88,4 +85,14 @@ func (s *service) GetTransactionHistory(input GetTransactionHistory) ([]entities
 	}
 
 	return transactions, nil
+}
+
+func (s *service) GetTransByTransactionCode(input GetTransactionByCode) (entities.Transaction, error) {
+	transaction, err := s.repository.GetByCode(input.Code)
+
+	if err != nil {
+		return transaction, err
+	}
+
+	return transaction, nil
 }

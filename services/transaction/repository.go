@@ -12,6 +12,7 @@ type Repository interface {
 	Save(trans entities.Transaction) (entities.Transaction, error)
 	GetByUserId(userId int) ([]entities.Transaction, error)
 	Update(transaction entities.Transaction) (entities.Transaction, error)
+	GetByCode(code string) (entities.Transaction, error)
 }
 
 type repository struct {
@@ -73,6 +74,18 @@ func (r *repository) GetByUserId(userId int) ([]entities.Transaction, error) {
 
 func (r *repository) Update(transaction entities.Transaction) (entities.Transaction, error) {
 	err := r.db.Save(&transaction).Error
+
+	if err != nil {
+		return transaction, err
+	}
+
+	return transaction, nil
+}
+
+func (r *repository) GetByCode(code string) (entities.Transaction, error) {
+	var transaction entities.Transaction
+
+	err := r.db.Where("code = ?", code).Find(&transaction).Error
 
 	if err != nil {
 		return transaction, err

@@ -23,6 +23,7 @@ type CampaignDetailResponse struct {
 	ImageUrl         string                       `json:"image_url"`
 	GoalAmount       int                          `json:"goal_amount"`
 	CurrentAmount    int                          `json:"current_amount"`
+	BackerCount      int                          `json:"backer_count"`
 	Description      string                       `json:"description"`
 	Slug             string                       `json:"slug"`
 	User             user.UserWithProfileResponse `json:"user"`
@@ -68,6 +69,7 @@ func FormatDetailCampaignResponse(campaign entities.Campaign) CampaignDetailResp
 		CurrentAmount:    campaign.CurrentAmount,
 		Description:      campaign.Description,
 		Slug:             campaign.Slug,
+		BackerCount:      campaign.BackerCount,
 		Images:           images,
 		Perks:            perksArray,
 		User:             user.FormatUserWithProfileResponse(campaign.User),

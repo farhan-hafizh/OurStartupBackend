@@ -5,6 +5,7 @@ import (
 	"ourstartup/entities"
 	"ourstartup/helper"
 	"ourstartup/services/campaign"
+	"ourstartup/services/payment"
 	"ourstartup/services/transaction"
 	"ourstartup/services/user"
 
@@ -15,10 +16,11 @@ type transactionHandler struct {
 	service         transaction.Service
 	userService     user.Service
 	campaignService campaign.Service
+	paymentService  payment.Service
 }
 
-func CreateTransactionHandler(service transaction.Service, userService user.Service, campaignService campaign.Service) *transactionHandler {
-	return &transactionHandler{service, userService, campaignService}
+func CreateTransactionHandler(service transaction.Service, userService user.Service, campaignService campaign.Service, paymentService payment.Service) *transactionHandler {
+	return &transactionHandler{service, userService, campaignService, paymentService}
 }
 
 func (h *transactionHandler) CreateTransaction(c *gin.Context) {
@@ -39,7 +41,7 @@ func (h *transactionHandler) CreateTransaction(c *gin.Context) {
 	userData := c.MustGet("loggedInUser").(entities.User)
 	input.User = userData
 
-	campaignSlug := campaign.GetCampaignSlugInput{
+	campaignSlug := campaign.GetCampaignInput{
 		Slug: input.CampaignSlug,
 	}
 
@@ -69,6 +71,20 @@ func (h *transactionHandler) CreateTransaction(c *gin.Context) {
 		return
 	}
 
+	paymentUrl, err := h.paymentService.GetRedirectUrl(trans)
+
+	if err != nil {
+		helper.SendErrorResponse(
+			c,
+			"Create transaction failed!",
+			http.StatusInternalServerError,
+			"failed",
+			err, nil)
+		return
+	}
+
+	trans.PaymentUrl = paymentUrl
+
 	formattedTrans := transaction.FormatNewTransactionResponse(trans)
 
 	helper.SendResponse(c, "Successfully create transaction!", http.StatusOK, "success", formattedTrans)
@@ -76,7 +92,7 @@ func (h *transactionHandler) CreateTransaction(c *gin.Context) {
 
 func (h *transactionHandler) GetTransHistoryByCampaign(c *gin.Context) {
 
-	var input campaign.GetCampaignSlugInput
+	var input campaign.GetCampaignInput
 
 	err := c.ShouldBindUri(&input)
 
@@ -163,4 +179,33 @@ func (h *transactionHandler) GetTransactionHistory(c *gin.Context) {
 
 	formattedTransactions := transaction.FormatTransHistoryResponse(transactions)
 	helper.SendResponse(c, "Successfully get campaign detail!", http.StatusOK, "success", formattedTransactions)
+}
+
+func (h *transactionHandler) GetNotification(c *gin.Context) {
+	var input payment.TransactionNotification
+
+	err := c.ShouldBindJSON(&input)
+
+	if err != nil {
+		helper.SendValidationErrorResponse(
+			c,
+			"Failed to process notification!",
+			http.StatusUnprocessableEntity,
+			"failed",
+			err)
+		return
+	}
+
+	err = h.paymentService.ProcessPayment(input)
+
+	if err != nil {
+		helper.SendErrorResponse(
+			c,
+			"Failed to process notification!",
+			http.StatusInternalServerError,
+			"failed",
+			err, nil)
+		return
+	}
+	helper.SendResponse(c, "Successfully get campaign detail!", http.StatusOK, "success", input)
 }

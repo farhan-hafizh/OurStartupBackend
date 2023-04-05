@@ -83,7 +83,7 @@ func (h *campaignHandler) CreateCampaign(c *gin.Context) {
 }
 
 func (h *campaignHandler) GetCampaignDetail(c *gin.Context) {
-	var input campaign.GetCampaignSlugInput
+	var input campaign.GetCampaignInput
 
 	err := c.ShouldBindUri(&input)
 
@@ -116,7 +116,7 @@ func (h *campaignHandler) GetCampaignDetail(c *gin.Context) {
 }
 
 func (h *campaignHandler) UpdateCampaign(c *gin.Context) {
-	var slugData campaign.GetCampaignSlugInput
+	var slugData campaign.GetCampaignInput
 
 	err := c.ShouldBindUri(&slugData)
 

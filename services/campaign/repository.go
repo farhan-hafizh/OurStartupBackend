@@ -9,6 +9,7 @@ import (
 type Repository interface {
 	Save(campaign entities.Campaign) (entities.Campaign, error)
 	FindBySlug(slug string) (entities.Campaign, error)
+	FindById(id int) (entities.Campaign, error)
 	FindAll() ([]entities.Campaign, error)
 	FindByCreatorId(id int) ([]entities.Campaign, error)
 	Update(campaign entities.Campaign) (entities.Campaign, error)
@@ -25,6 +26,18 @@ func CreateRepository(db *gorm.DB) *repository {
 }
 
 // find campaign by id
+func (r *repository) FindById(id int) (entities.Campaign, error) {
+	var campaign entities.Campaign
+
+	err := r.db.Where("id = ?", id).Find(&campaign).Error
+	if err != nil {
+		return campaign, err
+	}
+
+	return campaign, nil
+
+}
+
 func (r *repository) FindBySlug(slug string) (entities.Campaign, error) {
 	var campaign entities.Campaign
 

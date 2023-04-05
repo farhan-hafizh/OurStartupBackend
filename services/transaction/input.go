@@ -22,3 +22,7 @@ type GetTransByCampaignId struct {
 type GetTransactionHistory struct {
 	User entities.User
 }
+
+type GetTransactionByCode struct {
+	Code string
+}
