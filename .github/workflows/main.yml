@@ -1,7 +1,9 @@
 name: CI
 on:
   push:
-    branches: ["production"]
+    branches: ["master"]
+  pull_request:
+    branches: ["master"]
 
 jobs:
   build:
