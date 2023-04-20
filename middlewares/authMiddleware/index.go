@@ -3,6 +3,7 @@ package authMiddleware
 import (
 	"encoding/json"
 	"net/http"
+	"time"
 
 	"ourstartup/helper"
 	"ourstartup/services/user"
@@ -49,6 +50,13 @@ func (m *middleware) GetAuthMiddleware() gin.HandlerFunc {
 
 		if !ok || !token.Valid {
 			helper.SendErrorResponse(c, "Unauthorized", http.StatusUnauthorized, "error", nil, nil)
+			return
+		}
+
+		exp := claim["exp"].(float64)
+		if int64(exp) < time.Now().Unix() {
+			response := gin.H{"errors": "Token expired!"}
+			helper.SendErrorResponse(c, "Unauthorized", http.StatusUnauthorized, "error", nil, response)
 			return
 		}
 		// get user from claim (by default is float64) then convert it to int
