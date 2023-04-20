@@ -4,6 +4,7 @@ import (
 	"errors"
 	"ourstartup/entities"
 	"ourstartup/helper"
+	"time"
 
 	"github.com/golang-jwt/jwt"
 )
@@ -27,6 +28,7 @@ func (s *jwtService) GenerateToken(user entities.User) (string, error) {
 	claim := jwt.MapClaims{}
 	// initiate claim
 	claim["userId"] = user.Id
+	claim["exp"] = time.Now().Add(time.Minute * time.Duration(30))
 	// create token
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claim)
 	// sign token
