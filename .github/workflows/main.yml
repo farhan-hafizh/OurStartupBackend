@@ -7,7 +7,7 @@ on:
 
 jobs:
   build:
-    environtment: master
+    environment: master
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -31,7 +31,7 @@ jobs:
 
   deployment:
     needs: build
-    environtment: master
+    environment: master
     runs-on: ubuntu-latest
     steps:
       - name: Deploy build to VPS
